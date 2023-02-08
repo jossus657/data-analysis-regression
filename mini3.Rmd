@@ -1,0 +1,51 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+3692567 - 755013
+755013/1063
+
+```
+# trend
+# constant variance
+# normality
+```{r}
+atus <- read_csv('atusminiexam3.csv')
+model1 <- lm(socializing ~ phone, data = atus)
+atus2 <- atus %>% mutate(socialSR = sqrt(socializing), phoneSR = sqrt(phone))
+model_transformed <- lm(socialSR ~ phoneSR, data = atus2)
+plot(socializing ~ phone, data = atus)
+plot(socialSR ~ phoneSR, data = atus2)
+```
+```{r}
+plot(model1)
+abline(2,0)
+abline(-2,0)
+abline(v = 4/nrow(atus))
+```
+
+
+```{r}
+plot(model_transformed, cex = 0.5)
+abline(2,0)
+abline(-2,0)
+abline(v = 4/nrow(atus2))
+```
+
+```{r}
+leverage1 = hatvalues(model1)
+sort(leverage1[leverage1 > 4/nrow(atus)], decreasing = TRUE)
+4/nrow(atus)
+leverage2 = hatvalues(model_transformed)
+sort(leverage2[leverage2 > 4/nrow(atus)], decreasing = TRUE)
+sr1 <- rstandard(model1)
+which(sr1 >= 2)
+cd1 <- cooks.distance(model1)
+cd2 <- cooks.distance(model_transformed)
+which(cd1 >= 0.5)
+which(cd2 >= 0.5)
+54  63 119 173 180 182 187 
+```
+

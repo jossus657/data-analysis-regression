@@ -1,0 +1,175 @@
+---
+title: "101a HW 4"
+author: "Joshua Susanto - 405568250"
+date: "4/21/2022"
+output: pdf_document
+---
+
+From the book, do these exercises in Chapter 2. The problems begin on pge 38 of the textbook.
+
+```{r}
+library('knitr')
+library('tidyverse')
+```
+
+
+## 1) 1. The web site www.playbill.com provides weekly reports on the box office ticket sales for plays on Broadway in New York. We shall consider the dat for the week October 11–17, 2004 (referred to below as the current week). The data are in the form of the gross box office results for the current week and the gross box office results for the previous week (i.e., October 3–10, 2004). The data, plotted in Figure 2.6 , are available on the book web site in the file playbill.csv.
+
+### Fit the following model to the data: $Y = \beta_0 + \beta_1x + \epsilon$ where Y is the gross box office results for the current week (in $) and x is the gross box office results for the previous week (in $). Complete the following tasks:
+
+### (a) Find a 95% confidence interval for the slope of the regression model, b1. Is 1 a plausible value for b1? Give a reason to support your answer.
+
+```{r}
+playbill <- read_csv('playbill.csv')
+pb <- lm(CurrentWeek ~ LastWeek, data = playbill)
+summary(pb)
+confint(pb)
+```
+We get our slope interval to be (9.514971e-01, 1.012666)
+
+Yes, as 1 is in the 95% confidence interval for the slope of our regression model, it is a plausible value for $\beta_1$
+
+### (b) Test the null hypothesis H_0: b0 = 10000 against a two-sided alternative. Interpret your result.
+
+In order to test the null against an alternate we will use our fitted model to define the alternate hypothesis:
+
+```{r}
+pb$coefficients
+```
+
+Our alternate is thus,
+
+$H_a: \beta_0 = 6804$
+
+```{r}
+summary(pb)
+t <- (6804 - 10000)/(9.929e+03)
+t
+pt(t,16, lower.tail = TRUE)*2
+```
+
+We get our corresponding test statistic to be t = -0.3218854 with a corresponding p-value of 0.7517067. Clearly, our p-value is much greater than our significance level of 0.05 and therefore there is not enough statistical evidence to reject the null hypothesis. We thus fail to reject the null hypothesis.
+
+### (c) Use the fitted regression model to estimate the gross box office results for the current week (in $) for a production with $400,000 in gross box office the previous week. Find a 95% prediction interval for the gross box office results for the current week (in $) for a production with $400,000 in gross box office the previous week. Is $450,000 a feasible value for the gross box office results in the current week, for a production with $400,000 in gross box office the previous week? Give a reason to support your answer.
+
+
+We estimate the gross box office results for the current week for a production with $400,000 for the previous week to be:
+
+```{r}
+predict(pb, data.frame(LastWeek = 400000), interval = 'confidence', level = .95)
+```
+
+
+In order to see if \$450,000 is a feasible value for the gross box office results in the current week given that the gross box office sales for the previous week was $400,000 we must construct a prediction interval as so:
+```{r}
+predict(pb, data.frame(LastWeek = 400000), interval = 'prediction', level = .95)
+```
+We see that $450,000 exceeds the upper bound of this interval. Therefore, this is not a feasible prediction as it does not fall within a 95% confidence interval.
+
+### d) Some promoters of Broadway plays use the prediction rule that next week’s gross box office results will be equal to this week’s gross box office results. Comment on the appropriateness of this rule
+
+This prediction states that our slope should be 1 while our intercept should be 0. Based on the confidence interval that we generated in part a) we see that these 2 values do lie within our respective confidence intervals for intercept and slope respectively. Therefore this is an appropriate prediction as it falls within a range of 95% confidence.
+
+## 2) 2. A story by James R. Hagerty entitled With Buyers Sidelined, Home Prices Slide published in the Thursday October 25, 2007 edition of the Wall Street Journal contained data on so-called fundamental housing indicators in major real estate markets across the US. The author argues that… prices are generally falling and overdue loan payments are piling up . Thus, we shall consider data presented in the article on
+
+### Y = Percentage change in average price from July 2006 to July 2007 (based on the S&P/Case-Shiller national housing index); and
+
+### x = Percentage of mortgage loans 30 days or more overdue in latest quarter (based on data from Equifax and Moody’s).
+
+### The data are available on the book web site in the file indicators.txt. Fit the following model to the data: Y xe =+ + b b 0 1 . Complete the following tasks:
+
+### (a) Find a 95% confidence interval for the slope of the regression model, b1. On the basis of this confidence interval decide whether there is evidence of a significant negative linear association.
+
+```{r}
+indicators <- read.table("indicators.txt", header = TRUE) #read.table for txt files in table format, header argument used to take the first row as column names.
+ind <- lm(PriceChange ~ LoanPaymentsOverdue, data = indicators)
+confint(ind)
+```
+From the constructed confidence interval we see that there is evidence of a negative linear association as the entire interval for the slope is negative. Therefore, we are 95% confidenct that the true linear regression line has a negative linear association.
+
+### (b) Use the fitted regression model to estimate E(Y| X = 4). Find a 95% confidence interval for E (Y|X = 4). Is 0% a feasible value for E(Y|X = 4)? Give a reason to support your answer. 
+
+```{r}
+predict(ind, data.frame(LoanPaymentsOverdue = 4), interval = 'confidence', level = 0.95)
+```
+Based on our estimation interval we see that 0 is not a feasible value for E(Y|X = 4). 0 is greater thatn our upper bound of -2.310322 and is thus not within our 95% confidence interval.
+
+## 3) 5. Two alternative straight line regression models have been proposed for Y. In the first model, Y is a linear function of x1, while in the second model Y is a linear function of x2. The plot in the first column of Figure 2.8 is that of Y against x1, while the plot in the second column below is that of Y against x2. These plots also show the least squares regression lines. In the following statements RSS stands for residual sum of squares, while SSreg stands for regression sum of squares. Which one of the following statements is true?
+
+### (a) RSS for model 1 is greater than RSS for model 2, while SSreg for model 1 is greater than SSreg for model 2.
+
+### (b) RSS for model 1 is less than RSS for model 2, while SSreg for model 1 is less than SSreg for model 2.
+ 
+### (c) RSS for model 1 is greater than RSS for model 2, while SSreg for model 1 is less than SSreg for model 2.
+ 
+### (d) RSS for model 1 is less than RSS for model 2, while SSreg for model 1 is greater than SSreg for model 2.
+
+
+Answer choice (d) is the best answer for this question. By looking at the two models we already see that model 1 has a strong liner correlation while model 2 has a weak one. Model one has low scatter and thus the residual standard deviation is small while the opposite is true for model 2. Therefore, we know that the RSS for model 1 will almost certainly be smaller than the RSS of model 2. We know that SSreg measures the variance between our null model (mean) and our LS model and that the total variation is equal to the sum of SSreg and RSS. Therefore, since the RSS for model 1 is much smaller than the RSS of model 2 we can conclude that the SSreg for model 1 should be larger than the SSreg for model 2. Another reason for this conclusion is that because SSreg can also be interpreted as 'the improvement of adding a slope to our null model,' the fact that model 1 has a much stronger linear fit also tells us that the SSreg for model 1 should be much larger than the SSreg for model 2.
+
+
+## 4) 7. A statistics professor has been involved in a collaborative research project with two entomologists. The statistics part of the project involves fitting regression models to large data sets. Together they have written and submitted a manuscript to an entomology journal. The manuscript contains a number of scatter plots with each showing an estimated regression line (based on a valid model) and associated individual 95% confidence intervals for the regression function at each x value, as well as the observed data. A referee has asked the following question:
+
+### I don’t understand how 95% of the observations fall outside the 95% CI as depicted in the figures.
+
+## Briefly explain how it is entirely possible that 95% of the observations fall outside the 95% CI as depicted in the figures. 
+
+
+A 95% confidence interval means that we are 95% confident that our true regression function is within this interval. Regression lines are fitted based on minimizing residuals, therefore if there is an extremely large residuals or some kind of pattern in the scatter of observations it is very much possible that a linear model is not a good fit for the data. Adding a confidence interval is still giving us a range of linear models and is thus affected in the same way our estimated regression line is. Therefore, it is entirely possible for 95% of our observations to be outside of this interval as this interval measures a range of valid fitted functions rather than a range of observations.
+
+
+## 5) Below is output from a model from a new set of data that was used to predict people's armspans from their height. Use the output from the model to calculate the following components of the ANOVA table:
+
+****R Output*****
+> summary(m1)
+Call:
+
+lm(formula = armspan ~ height, data = armspan.sample)
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-6.3178 -1.1033  0.7212  1.5847  4.0721 
+Coefficients:
+            Estimate Std. Error t value Pr(>|t|)    
+(Intercept)  -3.3727     7.4147  -0.455    0.652    
+height        1.0390     0.1113   9.337 8.78e-11 ***
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+Residual standard error: 2.418 on 33 degrees of freedom
+Multiple R-squared:  0.7254,Adjusted R-squared:  0.7171 
+F-statistic: 87.17 on 1 and 33 DF,  p-value: 8.777e-11
+****END R Output*****
+
+### a) RSS
+
+```{r}
+rss <- (2.418^2)*33
+rss
+```
+
+### b) SSreg
+
+```{r}
+ssreg <- (87.17)*(rss/33)
+ssreg
+```
+
+### c) Mean SSreg
+
+```{r}
+ssreg/1 #ass SSreg has 1 degree of freedom
+```
+
+### d) Total SS
+
+```{r}
+ss <- ssreg + rss
+ss
+```
+
+
+### e) It's not part of the ANOVA table, but also find the correlation coefficient, r.
+
+```{r}
+r <- sqrt(ssreg/ss)
+r
+```
+

@@ -1,0 +1,20 @@
+---
+title: "quiz2"
+author: "Joshua Susanto"
+date: "4/24/2022"
+output: html_document
+---
+
+```{r}
+library('tidyverse')
+legoA <- read_csv('legoA.csv')
+prices <- legoA[,c("price", "amazon_price")]
+prices$meanprice <- rowMeans(prices, na.rm = TRUE, dim = 1)
+lego_lm <- lm(prices$meanprice ~ legoA$Unique_Pieces)
+summary(lego_lm)
+plot(lego_lm$residuals, legoA$Unique_Pieces[-lego_lm$na.action])
+confint(lego_lm)
+-5.8751/ 4.03450
+pt(-5.8751/ 4.03450, df = 204)*2
+```
+

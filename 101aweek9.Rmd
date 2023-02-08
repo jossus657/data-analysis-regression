@@ -1,0 +1,174 @@
+---
+title: "101a Week 9"
+author: "Joshua Susanto"
+date: '2022-05-24'
+output: html_document
+---
+
+```{r}
+cdc <- read_csv("cdc.csv")
+full <- lm(weight ~., data = cdc)
+full <- update(full, .~. -state)
+summary(full)
+plot(full)
+mmp(full)
+```
+
+Check 
+- scale location --> should have roughly horizantal line and no pattern
+- mmp --> lines should be roughly similar
+- normal QQ --> check normality
+- residual plot --> constant variance (no fan or clumping)
+
+```{r}
+mmps(full, terms = ~height+wtdesire+age)
+#include only the numerical columns
+```
+
+Two big outliers that seem to heavily skew our data
+
+- the red line in our scale location plot tell us that there may be a trend 
+  - may be due to outliers
+  - from our leverage plot we can see we have 2 high bad leverage and influence points
+  
+```{r}
+#Remove Outliers
+cdc1 <- filter(cdc, wtdesire <= 500)
+full1 <- lm(weight ~., data = cdc1)
+summary(full1)
+plot(full1)
+mmps(full1, terms = ~height+wtdesire+age)
+```
+
+- from our MMPS we can see that our model tend to overpredict our data
+  - only happend when data is sparse and when we go higher in x values
+  - not severe --> perhaps a slight issue in constant variance?
+- from our age MMP we can see that as age increases, people with a higher weight tend to decrease
+  - this seems to be the cause of our constant variance issue, we see very few points with high weight and age
+
+```{r}
+#Transform Y
+invResPlot(full1)
+MASS::boxcox(full1)
+summary(powerTransform(full1))
+```
+
+```{r}
+summary(powerTransform(cbind(cdc1$wtdesire, cdc1$age, cdc1$height)~1))
+```
+
+```{r}
+summary(powerTransform(cbind(cdc1$weight,cdc1$wtdesire, cdc1$age, cdc1$height)~1))
+```
+
+normality is not as important due to CLT
+  - still makes our prediction intervals not as reliable
+  
+high leverage
+  - for multiple regression we use a different rule
+  - hii + 2*(p_1)/n
+    - hii is the hat value of the hat matrix
+  -  the diagonals of the hat matrix are the leverages
+  
+colinearity
+  - colinear = correlated (linear combinations with each other)
+    - ex. height_feet = height_inches/12
+    - will get an error message if you fit this model
+``
+instability
+- if 2 or more predictors are linear combos --> impossible to invert the design matrix --> error
+- not necessarily bad --> reflects reality and must adapt model
+- it is possible to get a fitted model to be significant even if none of the predictors seem to be significant --> colinearity issue
+
+variance inflation factor
+- measures severity of colinearity
+- colinearity affects precision of estimatoes (variance)
+  - makes confidence and prediction intervals invalid
+- correlation (colinearity) inflates the stadard errors
+- since the SE gets bigger, the t stat will get smaller 
+  - this makes the p value bigger
+  - makes variables look less significant than they are --> type 1 errors
+  
+this is why even though we see from the p values that they are not significant our F test will still tell us otherwise
+
+generaly, VIF > 5 indicate a serious problem
+
+
+
+### THURSDAY NOTES
+what does y is associated with x mean?
+- E(Y|X) = g(x)
+- be careful! 'x is not associated with y' =/= 'the slope is 0'
+- association can be positive or negative, linear or nonlinear
+- correlation measures strength of a LINEAR ASSOCATION
+
+
+Model Building
+- what are some strategies for deciding what variables should be in the model
+- why cant we drop insignificant models from the full model --> colinearity may hide significance!
+
+omission bias
+- omitting an important variables leads to bias in the estimated parameters
+- ex ==> storks very significant with babies but is no longer significant when women are added to the model
+
+
+overfitting
+- we can push r squared to 100% by including as many predictors as observations: p = n
+the model will too perfectly fit the data
+- predictions of future observations will have a greater error
+- fooling yourself to thinking that the random variations aren't truly random
+- prediction interval extremely imprecise
+
+akaike information criterion (aic)
+- smaller aic = better
+aic = reward for good fit + penalty for complexity
+- compares reward from added variables versus the cost of adding a new variable
+
+AIC = n*log(RSS/n) + 2p
+
+
+bayes information criteria
+- BIC = n*log(RSS/n) + lop(n)p
+- the prob that BIC selects the correct model approaches 1 as sample size grows
+- for smaller sample sizes BIC is bias and chooses too simple
+
+
+basic strategies
+- best subsets --> consider all possible sets of variables
+- stepwise regression
+  - decreasing or increasing
+  
+  best subset
+  - set k =  p, fit full model
+  - set all k = p - 1 --> keep best
+  - keep going until k = 1
+  - compare all of these best models -> use AIC, BIC, R2 etc
+  - if a categorical variable is in the best model include all categories
+
+
+forward stepwise regression
+- fit all p = 1 models
+- keep best R squared
+- with winning model fit all new models with p = 1, keep best R squared
+- keep going
+- dependent on which model won previous round
+- best subset more extensive --> less practical
+- compare the winners
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

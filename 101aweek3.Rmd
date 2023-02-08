@@ -1,0 +1,113 @@
+---
+title: "1o1aweek3"
+author: "Joshua Susanto"
+date: "4/12/2022"
+output: html_document
+---
+
+# two sample t test
+
+H0: myu1 - myu2 = 0
+Ha: myu 1 - mmyu2 =/= 0
+
+to estimate difference between 2 means:
+    - average 1 - average 2
+    - X1 - X2
+    
+if null is true
+    - E(X1 - X2) = 0
+    
+if observations are independent
+      var(X1 - X2) = var(X1) + var(X2)
+      
+      var(X1) = sigma1^2 / n1
+      
+      var(X2) = sigma2^2 / n2
+      
+test stat might be:
+    
+      (X1 - X2)/√(var(X1) + var(X2))
+      
+hte null tells us about the means but not their values
+it also doesnt tell us the values of SD nor their relationship
+
+but if the SDs are equal
+
+sigma1 == sigma2 == sigma
+
+then you can pool all your data tgt and get a good estimate of sigma
+
+s^2 pooled = (n1 - 1)s1^2 + (n2 - 1)s2^2
+/n1 * n2 - 2
+
+s^2 = (1(n-1)) * sum from i = 1 to n (xi - myu)^2
+
+# pooled t stat
+
+t = X1 - X2/√s^2pooled (i/n1 + 1/n2)
+
+and this follows a t distribution with n1 + n2-2 degrees of freedom in R
+
+t.test(x,y, alternative = 'two sided')
+
+
+- if ur right and the sigmas are equal, then this is a good test
+- if ur wrong then its a bad test. the SDs were incorrectly estimates and ur p val is wrong
+- so in general it is safer to not assume equal SDs
+- if they are not equal, you have a better estimator of the p value. if they are equal then ur right
+
+if variances are unequal, we must estimate then seperately and use
+
+      t = idk
+      
+this follows a t distributionwith dof approximated by
+
+      df = idk
+      
+      t.test(x,y, alternative = 'two sided')
+      
+      
+# all the prior stuff assumes that group 1 was independent of group 2
+- what if you weight ppl at the start of a diet and again at the end and test the change in mean
+- in that case this is NOT INDEPENDENT
+- this is called the PAIRED T TEST
+- t.test(x,y, alternative = ..., paired = TRUE)
+
+
+        
+
+
+
+
+
+```{r}
+time <- c(0,3,60,100,140,180,210,265,330,390)
+depth <- c(12.5,11.25,10.5,9.25,8,7,6,4.75,3.5,2.5)
+plot(depth ~ time)
+```
+- looks linear
+- decreasing 
+```{r}
+lemon <- lm(depth ~ time)
+lemon_res <- resid(lemon)
+plot(lemon_res)
+abline(0,0)
+```
+
+
+
+```{r}
+armspan <- read.csv('Armspan 2022 raw distribute.csv')
+head(armspan)
+str(armspan)
+plot(armspan$What.is.your.height.in.INCHES..Note..5.feet...60.inches..6.feet...72.inches. ~ armspan$What.is.your.armspan.in.INCHES...Armspan.is.measured.as.the.greatest.distance.from.the.tip.of.the.fingers.of.the.left.hand.to.the.tip.of.the.fingers.of.the.right.when.your.arms.are.extended..parallel.to.the.ground.)
+```
+
+
+
+
+
+
+
+
+      

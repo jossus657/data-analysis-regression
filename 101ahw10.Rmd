@@ -1,0 +1,176 @@
+---
+title: "101a HW 10"
+author: "Joshua Susanto - 405568250"
+date: '2022-06-03'
+output: pdf_document
+---
+
+## A. Textbook Chapter 7: 3 (use only AIC and BIC)
+
+```{r}
+library("tidyverse")
+library("car")
+library("leaps")
+pga <- read_csv("pgatour2006-3.csv")
+pga$prizelog <- log(pga$PrizeMoney)
+```
+
+
+### (a) Identify the optimal model or models based on R^2(adj), AIC, AICC, BIC from the approach based on all possible subsets. 
+
+```{r}
+require(leaps)
+bestss <- regsubsets(prizelog ~DrivingAccuracy + GIR + PuttingAverage + BirdieConversion + SandSaves + Scrambling + PuttsPerRound,data = pga, nvmax = 7)
+summary(bestss)
+```
+
+```{r}
+bic <- summary(bestss)$bic
+bic
+p <- length(bic)
+plot(1:p, bic)
+lines(1:p,bic)
+```
+
+```{r}
+modela <- lm(prizelog ~ GIR, data = pga)
+modelb <- lm(prizelog ~ GIR + PuttsPerRound, data = pga)
+modelc <- lm(prizelog ~ GIR + BirdieConversion + Scrambling, data = pga)
+modeld <- lm(prizelog ~ GIR + BirdieConversion + SandSaves + Scrambling, data = pga)
+modele <- lm(prizelog ~ GIR + BirdieConversion + SandSaves + Scrambling + PuttsPerRound, data = pga)
+modelf <- lm(prizelog ~ DrivingAccuracy + GIR + BirdieConversion + SandSaves + Scrambling + PuttsPerRound, data = pga)
+modelg <- lm(prizelog ~ DrivingAccuracy + GIR + PuttingAverage + BirdieConversion + SandSaves + Scrambling + PuttsPerRound, data = pga)
+aic <- c(AIC(modela), AIC(modelb), AIC(modelc), AIC(modeld), AIC(modele), AIC(modelf), AIC(modelg))
+plot(1:p, aic)
+lines(1:p, aic)
+```
+
+
+From our results we get that the model with 3 predictors yields the lowest BIC. This model includes GIR, BirdieConversion, and Scrambling. The five variable model, however, has the lowest AIC followed by the four variable and three variable models respectively. Based on the AIC and BIC, I would say the 3 predictor model would be ideal as it has the lowest BIC and the 3rd lowest AIC
+
+
+### (b) Identify the optimal model or models based on AIC and BIC from the
+approach based on backward selection. 
+
+```{r}
+back <- regsubsets(prizelog ~DrivingAccuracy + GIR + PuttingAverage + BirdieConversion + SandSaves + Scrambling + PuttsPerRound,data = pga, nvmax = 7, method = 'backward') 
+summary(back)
+```
+
+```{r}
+backbic<- summary(back)$bic
+plot(1:p, backbic)
+lines(1:p, backbic)
+```
+
+```{r}
+modelb1 <- lm(prizelog ~ GIR, data = pga)
+modelb2 <- lm(prizelog ~ GIR + BirdieConversion, data = pga)
+modelb3 <- lm(prizelog ~ GIR + BirdieConversion + Scrambling, data = pga)
+modelb4 <- lm(prizelog ~ GIR + BirdieConversion + SandSaves + Scrambling, data = pga)
+modelb5 <- lm(prizelog ~ GIR + BirdieConversion + SandSaves + Scrambling + PuttsPerRound, data = pga)
+modelb6 <- lm(prizelog ~ DrivingAccuracy + GIR + BirdieConversion + SandSaves + Scrambling + PuttsPerRound, data = pga)
+modelb7 <- lm(prizelog ~ DrivingAccuracy + GIR + PuttingAverage + BirdieConversion + SandSaves + Scrambling + PuttsPerRound, data = pga)
+backaic <- c(AIC(modelb1), AIC(modelb2), AIC(modelb3), AIC(modelb4), AIC(modelb5), AIC(modelb6), AIC(modelb7))
+plot(1:p, backaic)
+lines(1:p, backaic)
+```
+
+
+From our results we get that the model with 3 predictors yields the lowest BIC. This model includes GIR, BirdieConversion, and Scrambling. The 5 variable model, however, has the lowest AIC followed by the 4 variable and 3 variable models respectively. Based on the AIC and BIC, I would say the 3 predictor model would be ideal as it has the lowest BIC and the 3rd lowest AIC
+
+### (c) Identify the optimal model or models based on AIC and BIC from the
+approach based on forward selection. 
+
+```{r}
+forward <- regsubsets(prizelog ~DrivingAccuracy + GIR + PuttingAverage + BirdieConversion + SandSaves + Scrambling + PuttsPerRound,data = pga, nvmax = 7, method = 'forward') 
+summary(back)
+```
+
+```{r}
+forwardbic <- summary(forward)$bic
+plot(1:p, forwardbic)
+lines(1:p, forwardbic)
+```
+
+```{r}
+forwardaic <- forwardbic - (log(nrow(pga))*1:7) + (2 * (1:7))
+plot(1:p, forwardaic)
+lines(1:p, forwardaic)
+```
+
+
+From our results we get that the model with 4 predictors yields the lowest BIC. This model includes GIR, BirdieConversion, SandSaves, and Scrambling. The 5 variable model, however, has the lowest AIC followed by the 4 variable and 6 variable models respectively. Based on the AIC and BIC, I would say the 4 predictor model would be ideal as it has the lowest BIC and the 2nd lowest AIC
+
+### (d) Carefully explain why the models chosen in (a) & (c) are not the same while those in (a) and (b) are the same. 
+
+Due to the nature of the algorithms an exhaustive approach will likely not yield the same results as a forward approach. A forward approach considers the previous best models when finding the best model for every p number of variables. The best subset approach finds the best model for every possible number of variables, and the best subset for each number of variables is not dependent on the best model for another number of variables. Another reason is that there may be colinearity between our variables, which may skew our best models.
+
+### (e) Recommend a final model. Give detailed reasons to support your choice. 
+
+I would recommend a model based on the best subsets method. In this method we found that a 3 predictor model was ideal to minimize BIC and a 5 variable model was the best for AIC. Since this dataset is large and BIC tends to go for a simpler model I would choose the 3 variable model. This model is also agreed upon using the backwards step method and does relatively well using the forwards step method. The model would include the variables: 
+-GIR 
+-BirdieConversion 
+-Scrambling 
+with the response variable being the log of prize money.
+
+### (f) Interpret the regression coefficients in the final model. Is it necessary to be cautious about taking these results too literally? 
+
+```{r}
+best <- lm(prizelog ~ GIR + BirdieConversion + SandSaves + Scrambling + PuttsPerRound, data = pga)
+summary(best)
+```
+
+Yes, colinearity might make some variables are significant seem insignificant. Additionally, the inclusion of one variable may skew the coefficients of another variable, which is why we need to review our models carefully and really ask if what the model tells us makes logical sense.
+
+## B. Consider the salary data set. Fit the best model you can.
+
+```{r}
+salary <- read_csv('salary.csv')
+require(leaps)
+bestsalary <- regsubsets(Salary ~ StartYr + DeptCode + Begin.Salary + Expernc + Gender + Rank,data = salary)
+summary(bestsalary)
+```
+
+
+### 1) What is your best model?
+
+```{r}
+salarybic <- summary(bestsalary)$bic
+p <- length(salarybic)
+plot(1:p, salarybic)
+lines(1:p, salarybic)
+salaryaic <- salarybic - (log(nrow(salary))*1:8) + (2 * (1:8))
+plot(1:p, salaryaic)
+lines(1:p, salaryaic)
+```
+
+From the BIC chart we can see that the lowest model is the model with 3 predictors. The AIC, however, suggests the model with 6 predictors. Since the AIC model has insignificant variables, we will stick with the BIC recommendation. Thus, the best model will be a model with 3 predictors being startYr, Begin.Salary, and Expernc. 
+
+### 2) Evaluate the model validity of your best model. No model is perfect, so where is it valid, where is it not?
+
+```{r}
+bestmodelsalary <- lm(Salary ~ StartYr +  Begin.Salary + Rank, data = salary)
+mmp(bestmodelsalary)
+plot(bestmodelsalary)
+summary(bestmodelsalary)
+```
+
+Looking at our diagnostic plots we can see from our scale location plot that we have a relatively even scatter. This means that our constant variance condition is satisfied in our model. From our normal QQ plot we can see that our normal residual condition isn't completely fulfilled as we can see some tapering off at the right end. From our leverage plot we can see that we have potentially 2 bad leverage points. Our mmps also show a relatively good fit with some tapering in our salary plot. I would assume that most of these issues come from the large outliers we can see in our diagnostic plots. 
+
+### 3) Assuming the model is valid, what is the estimated "gender gap" in salary? Give a 95% confidence interval.
+
+Since our model does not have gender as a variable we can assume that there is no gender gap in salary, at least for what the model gives us. In order to improve this we could go with the AIC model and see what the gender gap is there.
+
+### 4) "L'homme moyen" is a french phrase translated to "the average man" and was made famous in the 19th century as a way of studying social dynamics.  For each variable in your model, find the average.  Then, use these value to predict what the average man will make, on average. (In other words, find a 95% confidence interval for E(Y|average values and gender=male).)  Now do the same for women (E(Y|average values and gender=female). How do they compare? Is there overlap?
+
+```{r}
+mean(salary$StartYr)
+mean(salary$Begin.Salary)
+names(which(table(salary$Rank) == max(table(salary$Rank))))
+```
+
+```{r}
+predict(bestmodelsalary, data.frame(StartYr = 1972,  Begin.Salary = 11289, Rank = "Professr"), interval = "confidence")
+```
+

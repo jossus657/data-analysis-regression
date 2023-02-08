@@ -1,0 +1,399 @@
+---
+title: "101aweek2"
+author: "Joshua Susanto"
+date: "4/5/2022"
+output: html_document
+---
+
+# Statistical Inference
+- deduction 
+  - apply rules of logic and start with basic assumptions and axioms --> lead to a singular conclusion
+  
+- induction
+  - start with individual pieces and inferwhat the big picture would look likes
+  - reasonable attempt at the truth but with a margin of error
+  - statistical inference is the opposite of deduction
+
+- we dont observe the actual world rather, patterns in data that is distorted by sampling variation which leads to us not seeing the real world
+  - small samples --> big distortions
+  - big samples --> small distortions
+  
+# why do we need confidence intervals??
+- margin of error tells us how big/small the distortion is
+
+# why do we need hypothesis tests
+- because when we make decisions about populations based on a sample
+complete
+
+# how do we see whats in the popultaions
+- get a sense of distortions by random sampling --> simulations (and repitition)
+- math theory can provide a model of random variation (mathematical modeling)
+
+# remember…
+• Confidence intervals estimate a population parameter.
+• Each sample from the population will produce a different
+confidence interval. The margin of error tells us how different.
+• The confidence level measures the performance of our
+sampling method; it tells us how the collection of all possible
+confidence intervals behave.
+• Wider intervals have greater confidence than narrower intervals.
+• A confidence level of L% means that in infinitely many samples,
+L% of the confidence intervals will include the parameter value.
+
+A parameter is a number describing a whole population (e.g., population mean), while a statistic is a number describing a sample (e.g., sample mean). The goal of quantitative research is to understand characteristics of populations by finding parameters
+
+# Confidence Game
+1. 4800 - 5200 miles
+2. 1920 - 1960
+3. 1 - 8%
+4. 115 - 125
+5. -10 - 20 
+6. 6 - 12
+7. 15 - 25
+8. 1850 - 1950
+9. 2000 - 3000
+10. 1900 - 1950
+
+- confidence intervals estimate a population parameter
+- each sample from the pop will produce a diff confidence interval --> the margin of error tells us how diff
+- confidence level measures the performance of our sampling method; it tells us how the collection of all possible confidence intervals behave
+- lower the interval the more meaningful
+- wider the interval have greater confidencebut less meaningful 
+- a confidence level of L% means that in infinitely many samples, L% of the confidence intervals will include the parameter value
+
+# why has gun ownership decreased by 6%
+- samples may have been different size
+- diff pop
+- random chance (distortion)
+- something actually happened
+
+# stat vs parameter
+- paramteters are a characteristic of a population (summarize pop)
+- statistic is an element of the data (numbers that summarize the distribution of a sample of data)
+
+
+# Ci formula
+- estimate +- margin of error
+
+the margin of error 
+- standard error, measure of how a statistic varies from sample to sample (half of the whole margin)
+- turning the parameter to set the width as a multiple of the standard error
+
+# CIs in R
+- with(cdc, t.test(wight))
+
+# what does a CI do
+- there is not just one CI, you only see one bc u have 1 sample
+- there are near infinitely many possible random samples that could have been taken
+- when you see a CI, remind yourself that it represents a process, this process is designed to capture the pop mean value in a high percentage of random samples
+
+# confidence levels
+- the level measure the quality of the process, not the outcome
+
+
+# to get this to work
+• we needed to know two things:
+• what distribution does our test statistic follow? This is
+called the sampling distribution.
+• What's the standard deviation of the sampling
+distribution? This is called the standard error
+• We assumed the sample proportion followed a Normal
+distribution, approximately.
+• We had to estimate the standard error: √pˆ(1-p^/n)
+
+
+# sampling distribution
+• Imagine taking many, many (infinitely many) random
+samples of the same size, n.
+• For each sample you calculate the statistic (in this case,
+the sample proportion).
+• The distribution of these statistics is called the sampling
+distribution.
+• More precisely, it is the distribution of the statistic based
+on all possible random samples from the population.
+
+
+# how did we know the sampling distribution?
+• The Central Limit Theorem tells us
+• If a statistic is a linear combination of the data, then it's
+distribution is approximately Normal, and this
+approximation improves as the sample size increases.
+• (The sample proportion is a linear combination of the
+data: you add up the 1's and 0's and divide by n.)
+
+# sampling distribution
+• The sampling distribution is a type of probability
+distribution that tells us:
+• which values of the statistic can happen
+• and the probability of those values
+
+Suppose we each take a random sample of 1000 students from the population of
+UCLA undergraduates.
+We each then find a confidence interval for the mean student loan debt of UCLA
+students.
+What is true about these confidence intervals?
+# A. The endpoints (the lower bound and upper bound) will likely all be different. <<<
+B. They will all be centered on the population mean.
+C. They will all be centered on the same value, but not on the population mean.
+D. There's nothing true about confidence intervals.
+
+
+What is a confidence level?
+A. The probability that your interval contains the population
+parameter.
+# B. The probability that a random sample will produce a 
+confidence interval that contains the population parameter.
+C. A and B are both saying the same thing.
+D. None of these is correct.
+The confidence level is a performance measure. It helps you understand the
+extent to which you should trust the method, not the result.
+
+
+#estimating population means
+• We have two favorite estimators: the mean and the median.
+• The mean has several advantages:
+• it’s a linear combination of the observations, and so the CLT applies
+• it’s unbiased
+• it’s precision is improved as sample size gets bigger
+• it’s also the maximum likelihood estimator
+
+# For a sample mean, if n is large enough,
+
+x¯ ⇠ N(µ, sd/√n)
+
+µ is the population mean
+sd is the population standard deviation
+
+
+# CI for Mean
+• We can use this knowledge to find confidence
+intervals for the mean.
+• But it’s a little trickier than for proportions because
+with proportions, if you know the mean, p, you
+know the standard error (sqrt(p(1-p)/n)).
+• But with means, knowing the mean doesn’t tell you
+anything about the standard error (s/sqrt(n))
+
+If you *do* know the population standard deviation:
+x¯ ± 1.96 p/n
+will include the population mean in 95% of all samples
+
+
+x¯ ± 1*p/n
+will include the population mean in 68% of all samples
+
+where p is the mean
+
+
+If we don’t know the population standard deviation (and we
+usually do not), then the Normal distribution is the wrong
+sampling distribution.
+Instead, the t-distribution is used.
+x¯ ± tn-1 * s/√n
+
+
+
+# Lecture 2.2 Hypothesis Testing 
+right 111111111
+wrong 1
+
+# goals
+- state null and alt hyp
+- understand why hyp tests are used
+
+# guess card color
+
+p^ = 0.9
+
+p^ = statistic based on data (real)
+p = pop parameter (hypothesis)
+
+
+#hypothesis
+- null: success rate is 0,5 becuase u have 50% odds
+- alr: some way of prediction so that you get more than 50%
+
+**is it remarkable to be that lucky to get a 9/10
+
+Ho: p = 0.5
+Ha: = > 0.5
+
+p^ = 0.9
+X = 9
+
+what is the sampling dist for these test statistics
+ BINOMIAL
+ - constant success prob
+ - fixed number of trials
+ - 2 possibilities, succes and failute
+ 
+ in this case
+ n = 10, p = 0.5, X = 9
+ 
+# paradigm
+ - assume null is true --> 50% success rate
+ - if performance is consistent with what happens by chance, then nothing happens
+ - but if i do something extremely improbable, then something other than chance is at play maybe
+ 
+aka if the statistic is too extreme then we may reject eh null hypothesis
+
+# what does extreme mean
+- we want to rarely make a type 1 mistake
+type 1 error -> reject the null when it is true
+- so we want P(Reject null| null is true) to be small
+  - how small?
+  - represented by a significance level, or a
+  - a = p(type1)
+  - ppl like 0.05 but it can vary
+  
+  
+# Which is the Type I error in context?
+We conclude he is "psychic", when he's really just guessing
+--> We conclude he is guessing, when he's actually "psychic".
+We conclude he is "psychic".
+We conclude he is guessing, when he actually is guessing.  
+
+
+So we want P(we declare him psychic when he's really just guessing) to be small.
+How small?
+The answer to this question is called the significance level, represented by a lc alpha
+                a = P(TypeI)
+In many contexts, a significance level of 0.05 or lower is desired.
+But it is subjective
+
+# how do we achieve this sig level
+- measure how extreme the statistic is
+- the p value provides this measure
+  - p(A test stat generated under the conditions of the null would be as extreme or more extreme, than the one we observed)
+  - note that this is a conditional probability: we are finding the probability of an extreme test stat condition on the null hyp being true
+  
+# p val
+- p value is a random variable
+- if p is true, the p value follows a uniform distribution on [0,1]
+- so if we wanna minimize type 1 errors with prob alpha, we can achieve this 
+
+P(X >= 9 | p = 0.5) when binomial(10,0.5)
+
+sum(dbinom(9:10,10,0.5)) --> 0.001
+
+
+------> use t test when n < 30 if not use z and assume normal
+
+
+estimator - process that produces the estimate
+
+# p-value: approximation for proportions
+But if n is large, it can be cumbersome/slow to calculate the exact binomial
+
+Z = pˆ- p0/√p0(1- p0)/n
+If n is "large" then this follows, approximately, a N(0,1) distribution.
+
+
+# approximate
+• The z-statistic follows an approximate N(0,1) distribution if
+the sample size is large.
+• Rule of thumb: you need at least 10 expected successes
+and 10 failures (assuming the null hypothesis is true).
+• so np > 10 and n(1-p) > 10
+• Our sample size is too small! So the approximation will
+be bad. But let’s calculate anyways:
+
+
+
+# Moving On:
+• How do we measure the performance of our estimators?
+• What is the statistical model behind simple linear
+regression?
+
+# german tank problem
+•Given these “serial numbers” 805, 2086, 2644,
+599,2157,1099,1758, 826, 1391, 176; estimate the
+total number of tanks.
+•Come up with three estimators for the total number
+of tanks.
+•Choose one that you think will work best and explain
+why.
+# german tank II
+• Write R code that simulates the performance of your favorite estimator plus one other estimator.
+• The input should be:
+• Number of tanks, N
+• sample size, n
+• number of repetitions,R
+• random seed
+• For each repetition:
+• draw a random sample of size n from population 1, 2, …N
+• calculate an estimate using your “favorite” estimator
+• calculate an estimate using one of your other estimators
+• Output is two vectors. One contains the R estimates from the favorite estimator, the other from the second-choice.
+• Which estimator worked bettter and why?
+
+# german tank estimators
+- max + min
+- max
+- median * 2 or mean * 2
+- assume uniform dist
+  - find average distance between values
+- Q1 + Q3
+
+- taking one statistic to decide who won is bad bc they could have got lucky
+  - need multiple tests to see who gets it a majority of the time
+  
+  
+  
+  
+# What to look for in a sampling distribution
+• Center: The difference between the mean and the value of
+the parameter measures the bias.
+• Spread: The standard deviation is the standard error and
+measures the precision.
+• Shape: the shape tells us how to make confidence
+intervals in order to get a desired confidence level and
+helps calculate p-values in hypothesis tests.
+
+# Some nice things in an estimator
+• unbiased
+• precise (low standard error)
+• a known sampling distribution or good approximation to
+the sampling distribution.
+• others, too.
+
+# The Linear Model
+Yi = b0 + b1xi + ei
+ei ⇠ iidN(0, sigma)
+
+iid means “independent and identically distributed”
+
+Write a function that generates data according to this model.
+Input: beta_0, beta_1, sigma, x (x is a vector of length n), random.seed
+Output: vector of length n
+If you plot the output against x, what should the graph look like?
+try it with x <- rep(1:10, by = .1, 4)
+random.seed=123
+beta_0 = 1
+beta_1 = 3
+sigma=3  
+  
+  
+  
+## MINI EXAM
+```{r}
+exam <- read.csv('miniexam1.csv')
+head(exam)
+april <- exam %>% filter(date == '2022-04-04')
+april %>% filter(dailycount == max(april$dailycount))
+```
+
+  
+```{r}
+date <- exam %>% group_by(name) %>% summarize(count = max(dailycount, na.rm = TRUE)) %>% arrange(desc(count))
+head(date)
+```
+  
+```{r}
+library(ggplot2)
+westwood <- exam %>% filter(name == 'Westwood')
+ww <- ggplot(westwood, aes(x = dailycount))
+ww + geom_histogram(fill = 'purple', binwidth = 50) + labs(title = "Westwood Daily Count Histogram", x = 'Daily Count', y = 'Frequency')
+```
+
+

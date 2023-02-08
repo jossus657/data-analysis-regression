@@ -1,0 +1,108 @@
+---
+title: "101a HW 5"
+author: "Joshua Susanto - 405568250"
+date: "4/28/2022"
+output: pdf_document
+---
+
+## 1) Using the data file "armspans2022_gender.csv", answer these questions:
+
+```{r}
+library('tidyverse')
+armspan <- read_csv("armspans2022_gender.csv")
+head(armspan)
+```
+
+### a) what proportion of the class identified as female?
+
+```{r}
+mean(armspan$is.female)
+```
+
+
+### b) Fit the regression equation 
+
+$$E(armspan|isfemale) =  \beta_0 + \beta_1 * (isfemale)$$
+```{r}
+armspan$is.female
+model1 <- lm(armspan ~ is.female, data = armspan)
+summary(model1)
+```
+
+
+### Interpret the intercept
+
+We got our intercept to be 69.7586. This means that we estimate the mean armspan value for those who identified as male to be about 69.7586. 
+
+### c) Interpret the slope from (b)
+
+Our slope value came out to be -7.7338. This means that the difference in average armspan for those who identified as male and those who identified as female is about -7.7338. Alternatively, we can say that the average armspan for those who identified as female is 7.7338 less than those who identified as male on average.
+
+### d) The summary command provides a t-statistic and p-value for the slope.  What is this testing in this context?
+
+In the context of this model the hypothesis test for the slope tests whether or not the difference in average value that we got in our model (the slope) is statistically significant assuming our null hypothesis is true. The null in this scenario would be that the slope is 0, or that there is no difference in the average armspan of males and females. Our hypothesis tests tells us whether or not the difference we got is statistically significant, or if there truly is a difference in male and female armspan.
+
+### For the rest, use the iowatest data.
+
+## 2) Iowa City is the home of the university of Iowa. Do schools in Iowa City out perform the rest? Answer, and provide supporting statistics and graphics (a graphic is required.)
+
+```{r}
+iowa <- read_delim('iowatest.txt', delim = '\t')
+iowa$City <- as.factor(iowa$City)
+unique(iowa$City)
+boxplot(iowa$Test ~ iowa$City, cex.axis = 0.7, xlab = 'City', ylab = 'Test')
+```
+
+From this boxplot we can see that Iowa City definitely has the largest average test score as well as the highest individual score. Below are statistics that confirm this statement. 
+```{r}
+city <- iowa %>% group_by(City) %>% summarize(meantest = mean(Test, na.rm = TRUE)) %>% arrange(desc(meantest))
+city
+iowa[iowa$Test == max(iowa$Test),]
+```
+
+
+## 3) Test scores are meant to reflect the success of a school's academic program. But many critics point out that factors other than academic success can influence a score. In particular, a school's score might be merely a reflection of the wealth of the student body. Address this issue by fitting a regression line to predict school test score from poverty score. Is there evidence that poverty is associated with the test score?
+
+```{r}
+test_lm <- lm(Test ~ Poverty, data = iowa)
+plot(Test ~ Poverty, data = iowa)
+abline(test_lm)
+summary(test_lm)
+```
+
+From this plot we can clearly see a negative linear correlation between the two variables. We get a small (< 0.05) p-value for our slope which tells us that our variables are indeed negatively associated and that the null model is rejected. 
+
+```{r}
+plot(test_lm$residuals ~ iowa$Test)
+abline(0,0)
+```
+
+From the residual plot we can also see an even and constantly varied scatter which implies that our model is a good fit for the data.
+
+From all of this evidence we can conclude that there is indeed an association between poverty and test scores.
+
+## 4) Interpret each of the first three of four diagnostic plots that R provides for this model. (The residual plots, the normal q-q plot, and the scale-location plot.)
+
+```{r}
+plot(test_lm)
+```
+
+From the residual plot we can see that there is a consistently varied scatter and therefore we can say that the constant variance assumption is met. From the Normal Q-Q plot we can see that other than the ends of the plot (where we expect the most deviance from the line), our points are relatively straight and consistent with the normal line. This implies that our normality of residuals assumptions is met. From the scale location plot we can still see a constant scatter with the standardized residuals with very few points being flagged by R. In general we can say that there is no pattern and therefore we still have relatively constant variance.
+
+
+## 5) Which point has the highest leverage? (Indicate which row it belongs to in the data frame.) Are there any bad leverage points? If so, which? If not, show R code you used that verifies that there are no bad leverage points.
+
+```{r}
+leverage = hatvalues(test_lm)
+sort(leverage[leverage > 4/nrow(iowa)], decreasing = TRUE)
+```
+
+We get 9 high leverage points for our data with row 27 having the highest leverage. However we see that none of these high leverage points are outside the range of (-2, 2) and therefore none of these points are bad leverage points. 
+
+## 6) What hypotheses (null and alternative) is the F-test in the summary outpu t for Question 3 testing? Give the conclusion to this test.
+
+```{r}
+anova(test_lm)
+```
+
+The F-stat hypothesis test tests whether or not the null (how much our model is affected by adding a slope) should be rejected or fail to be rejected. From our anova table we can see that we get a very large F value and thus a very small p value which tells us that there is enough statistical evidence to reject the null hypothesis and conclude that there is indeed an association between poverty and test scores and that adding our slope was the better fit for our model.

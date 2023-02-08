@@ -1,0 +1,49 @@
+---
+title: "101a week 7"
+author: "Joshua Susanto"
+date: "5/10/2022"
+output: html_document
+---
+
+```{r}
+salary <- read_csv('salary.csv')
+boxplot(Salary ~ Gender, data = salary)
+boxplot(Salary ~ Rank, data = salary)
+ggplot(data = salary, aes(x = Rank, y = Salary)) + geom_boxplot(aes(fill=Gender))
+```
+
+```{r}
+salary$gender <- if_else(salary$Gender=="Male",'blue','red')
+plot(salary$Salary, col = salary$gender)
+female <- salary[salary$gender == 'red',]
+male <- salary[salary$gender == 'blue',]
+group <- salary %>% group_by(Gender)
+model <- lm(Salary ~ Gender, data = salary)
+plot(model)
+model2 <- lm(Salary ~ Gender+Rank, data = salary)
+summary(model2)
+summary(model)
+```
+
+
+```{r}
+salary <- salary %>% select(Gender:Rank) %>% mutate(Dept = factor(DeptCode)) %>% select(Gender, StartYr, Begin.Salary:Dept)
+fullmodel <- lm(Salary ~ ., data = salary)
+summary(fullmodel)
+```
+
+```{r}
+mussels <- read.delim('mussels.txt', sep = '\t')
+str(mussels)
+mussels
+pairs(mussels)
+modelfood <- lm(thickness ~ food, data = mussels)
+summary(modelfood)
+mft<- lm(thickness ~ temp+food, data = mussels)
+summary(mft)
+#how to interpret, --> at constant levels of other variables this variable affects thickness this way```
+anova(mft)
+#in summary the variable is tested against all the previous ones while anova compares everything
+# ^ wait switch it lol
+
+```

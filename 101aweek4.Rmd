@@ -1,0 +1,17 @@
+---
+title: "101a week 4"
+author: "Joshua Susanto"
+date: "4/19/2022"
+output: html_document
+---
+association
+summary()
+confint()
+
+mean of y given x
+predict()
+
+
+total variance is an internal value --> always the same and never changes
+determined in nature
+

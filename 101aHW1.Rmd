@@ -1,0 +1,129 @@
+---
+title: "101a HW1"
+author: "Joshua Susanto - 405568250"
+date: "3/30/2022"
+output: pdf_document
+---
+
+Upload the data in the file chicagotaxiraw.csv.  The data you see is a random sample of data about taxi trips in Chicago, drawn from that city's open data portal.
+
+For each question, provide your code and, when appropriate, the answers.  Submit a pdf. Be sure that the file has your name and bruin ID within it.
+
+To answer these questions, you'll have to do some data cleaning. In addition to loading dplyr, you'll need lubridate and stringr. (Hint: you can get all of these (and more!) by loading and installing the package "tidyverse").  Feel free to google.  StackOverFlow is your friend, but consult the official documentation first because that often saves time.
+
+```{r}
+library('tidyverse')
+library('tinytex')
+library('lubridate')
+```
+
+1) To simplify live, create a new data set that contains ONLY these variables:
+
+Trip ID
+
+Taxi ID
+
+Trip Start Timestamp
+
+Trip End Timestamp
+
+Trip Seconds
+
+Trip Miles
+
+Fare
+
+Tips
+
+Tolls
+
+Extras
+
+Trip Total
+
+Payment Type
+
+Company
+
+```{r}
+taxi <- read.csv('chicagotaxiraw.csv')
+head(taxi)
+str(taxi)
+mytaxi <- select(taxi, starts_with('T'), Fare, Extras, Payment.Type, Company)
+#You can use backticks in the select function for column names with spaces or other special characters
+```
+
+In your new data set, change the variable names so that they are ALL lower case and all one string.  For example, instead of "Trip ID", "trip_id".  The reason for this is to make typing easier in the future.
+
+hint: try rename() and rename_with.
+
+```{r}
+mytaxi <- rename_with(mytaxi, tolower)
+new_names <- gsub('\\.','_',names(mytaxi)) #use double backslash to ignore period operator
+mytaxi <- set_names(mytaxi, new_names)
+head(mytaxi)
+```
+
+
+2) What range of dates are covered by this data set? Give the date of the first pick-up and the last drop-off.
+```{r}
+first <- arrange(mytaxi, trip_start_timestamp)
+date1 <- first$trip_start_timestamp[1]
+print(as.Date(date1, format = '%Y-%m-%d'))
+last <- arrange(mytaxi, desc(trip_end_timestamp))
+date2 <- last$trip_end_timestamp[1]
+print(as.Date(date2, format = '%Y-%m-%d'))
+```
+The data covers dates starting from 1/1/2013 all the way to 5/31/2017.
+
+3) What day has the greatest number of trips begin, and how many trips are there? What day has the least number of trips and how many trips? I initially assumed 'day' refers to the date, however I did this problem in two ways as Professor Gould stated he meant day to mean weekday.
+```{r}
+mytaxi <- mutate(mytaxi, date = substr(trip_start_timestamp,1,10))
+print(sort(table(mytaxi$date), decreasing = TRUE)[1])
+print(sort(table(mytaxi$date))[1]) #count vs table
+mytaxi <- mutate(mytaxi, weekday = wday(date))
+print(sort(table(mytaxi$weekday)))
+```
+The date that has the most trips begin is March 15th, 2014 with 132 trips begin, while the day with the least is December 25th, 2016 with 6 trips begin.
+
+However the weekday with the most trips is Friday with 16767 trips begin and the weekday with the least trips is Monday with 12406 trips begin.
+
+
+4) What's the typical amount for a tip? Is it better to report the mean or the median amount, and why?
+
+Hint: this requires some cleaning and working with strings.
+
+https://rpubs.com/iPhuoc/stringr_manipulation (perhaps too much information)
+
+Check out the working with strings cheatsheet (stringRcheatsheet.pdf)
+
+Here's how to do it in baseR:
+
+fix <- function(x){
+
+  x2 <- gsub("\\$","",x)
+
+  as.numeric(as.character(gsub(",", "", x2)))
+
+}
+
+Using stringr, you can simplify this somewhat using the str_replace() fun
+```{r}
+mytaxi <- mytaxi %>% mutate(tip = str_replace(tips, '\\$', '')) %>% mutate(tips = as.numeric(tip))
+summary(mytaxi$tips)
+tips <- ggplot(mytaxi, aes(x = tips)) 
+tips + geom_boxplot(color = 'purple') + xlab("Tip (amount)") + ggtitle('Boxplot of Tips')
+```
+
+
+The typical amount for a tip is $0. Looking at a boxplot of the tips data we can see the overwhelming amount of outliers this data contains with respect to tip amount. Therefore, it is safe to assume that the mean was heavily influenced by these outliers. This distribution is thus right skewed and since the median statistic is less affected by outliers than the mean, it would be better to report the median amount.
+
+
+5) This question is optional:  What else do you see that looks "funny" with these data?
+```{r}
+head(mytaxi)
+table(mytaxi$payment_type)
+dispute <- filter(mytaxi, payment_type == 'Dispute')
+table(dispute$company)
+```
+i was surprised that there was a payment type names 'Dispute'. I think its strange that most payment 'disputes' happen with one company, being the Dispatch Taxi Affiliation.

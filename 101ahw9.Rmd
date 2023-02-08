@@ -1,0 +1,158 @@
+---
+title: "101a HW 9"
+author: "Joshua Susanto - 405568250"
+date: '2022-05-30'
+output: pdf_document
+---
+
+Load the dietstudy data into R (from "data used in class" folder). Create a new subset of data that includes only these variables:
+DIET, AGE, SEX, WEIGHT_0, DROPOUT2, WEIGHT_2, ADHER_2.
+
+```{r}
+library("tidyverse")
+diet <- read_csv("dietstudy.csv")
+diet <- diet %>% select("DIET", "AGE", "SEX", "WEIGHT_0", "DROPOUT2", "WEIGHT_2", "ADHER_2")
+head(diet)
+```
+
+To this dataframe add a new variable that represents the change in weight after two months:
+
+wtchange=WEIGHT_2-WEIGHT_0
+
+```{r}
+diet <- diet %>% mutate(wtchange = WEIGHT_2 - WEIGHT_0)
+head(diet)
+```
+
+The data come from a randomized study to determine which data was best for losing weight at 2, 6 and 12 months. We'll examine only 2 month weight change. WEIGHT_0 is baseline weight, and WEIGHT_2 is weight after two months. DROPOUT2 is an indicator variable that indicates whether the subject dropped out of the study. ADHER_2 measures how well the subject adhered to the diet, with higher scores indicating higher adherence (self-reported).
+
+
+### a) Make a graphic to compare weight changes across diets. Based on this plot, which diet, if any, would you conclude was most effective?
+ 
+```{r}
+boxplot(wtchange ~ DIET, data = diet)
+```
+
+Each of these diets seem to yield roughly similar results. Objectively, I would say that the Atkins diet seems to have the marginally the best results.
+
+### b) Note that some weight change values are exactly equal to 0? Why is this? Explain why, and then drop the 0 values from all subsequent analyses.
+ 
+Some of the participants dropped out of the study, as indicated by the dropout variable. Additionally, some may experience no weight change.
+
+```{r}
+diet2 <- diet %>% filter(wtchange != 0)
+```
+
+
+### c) Create a linear model that includes as predictors age, diet, sex, baseline weight and adherence. What does this model say about the effectiveness of the diets? Based on this model, what should a physician tell her patients about losing weight? (Don't worry, for now, about assessing model validity. And don't worry about transformations or interactions or polynomials.)
+
+```{r}
+model1 <- lm(wtchange ~ AGE + DIET + SEX + WEIGHT_0 + ADHER_2, data = diet2)
+summary(model1)
+```
+
+Based on this model, we can see that adherance is the most statistically significant predictor assuming all other predictors are constant. It is also the predictor with the greatest magnitude of slope. Thus, I would recommend that the key to losing weight is to stick to your diet and not fall out of habit.
+
+### d) Interpret the "DIETOrnish" slope.
+ 
+When age, sex, baseline weight, and adherance is constant, the Ornish diet program is on average 0.154 pounds greater than Atkins diet program in terms of weight change.
+
+### e) It appears that those who adhere to the diet tend to lose more weight. However, some diets might be easier to adhere to than others. Add an interaction effect to test whether the effect of adherence is the same for the diets.
+
+```{r}
+model2 <- update(model1, . ~ .+ADHER_2:DIET, data = diet2)
+summary(model2)
+```
+
+Based on the interaction in our model we can see that none of these interactions are statistically significant, which may imply that there is no significant affect of diet on adhererance. However, if we were to dismiss the p-values, we see that Weight Watchers has th smallest slope out of the 4 diet plans. This may imply that out of the diet plans, the Weight Watchers diet has the greatest effect on adherance.
+ 
+
+Textbook Chapter 6: 3 & 5 (Note that for 3 you do not need to do any work; you can use the outputs provided)
+
+## 3
+
+### (a) Decide whether (6.36) is a valid model. Give reasons to support your answer. 
+
+From the diagnostic plots we can see many hints about the validity of our model. From our residual plot we can see a clear fan shaped image with the scatter of our points increasing as our x value increases. This goes against the constant variance condition. Additionally, from our QQ norm plot we can see a large taper at the end which implies that our residuals are not normally distributed. There also seem to be a few high/bad leverage points. All of these facts point to the model not being valid.
+
+### (b) The plot of residuals against fitted values produces a curved pattern. Describe what, if anything can be learned about model (6.36) from this plot.
+
+First of all, this tells us that the model does not satisfy the linear trend condition of our linear model and therefore is not a valid model. Furthermore, this may imply that a transformation could be used on our model in order to fit the data better, whether that be adding another variable or raising the power or another form of transformation.
+
+### (c) Identify any bad leverage points for model (6.36). 
+
+Looking at the leverage diagnostic plot, we can see that point 223 is a bad leverage point.
+Using the multivariate high leverage formula (2(p + 1)/n), we can see that point 223 is a high leverage point. Since it's standardized residual is outside the (-4,4) range we know that this is a bad leverage point as well.
+
+### (d) Decide whether (6.37) is a valid model. 
+
+We see from the model summary that all of the transformed parameters are statistically significant and our F stat is as well. This implies that our model is a good fit. Looking at our diagnostic plots we can see that we now satisfy the constant variance condition by looking at our residual plot. From our scale location plot we can also see no clear trend which satisfies our trend condition. We can also see that our residuals follow much closer to a normal distribution based on our QQ norm plot. Therefore, this is a valid model based on all of these observations.
+
+### (e) To obtain a final model, the analyst wants to simply remove the two insignificant predictors (1/x4) (i.e., tHighwayMPG) and log (x6) (i.e.,tWheelBase) from (6.37). Perform a partial F-test to see if this is a sensible strategy. 
+
+$H0 : \beta_4 = \beta_6 = 0$
+$Ha : \beta_4 = \beta_6 \neq 0$
+
+```{r}
+rssfull = 0.17242^2* 226
+rssred = 0.1781^2 * 228
+f = ((rssred-rssfull)/2)/(rssfull/226)
+pf(f, df1 = 2, df2 = 226, lower.tail = FALSE)
+```
+
+
+Since the p-value 0.0002434316 is smaller than the significance value of 0.05, there is significant evidence ro conclude that the slope for the two insignificant predictors is not equal to 0. Therefore, it is not a good idea to remove these variables from our model.
+
+### (f) The analyst’s boss has complained about model (6.37) saying that it fails to take account of the manufacturer of the vehicle (e.g., BMW vs Toyota).
+Describe how model (6.37) could be expanded in order to estimate the effect
+of manufacturer on suggested retail price.
+
+The model could be expanded by adding a new variable that accounts for manufacturer. We could then use any model algorithms to see if manufacturer is a significant variable that should be included in our model. We could then check these models using R squared, AIC, or BIC. If manufacturer is included in any of our best models we can conclude that manufacturer should be included in our model
+
+## 5.
+
+```{r}
+library("car")
+pga <- read_csv("pgatour2006-3.csv")
+```
+
+
+### (a) A statistician from Australia has recommended to the analyst that they not transform any of the predictor variables but that they transform Y using the log transformation. Do you agree with this recommendation? Give reasons
+to support your answer. 
+
+```{r}
+pgamodel <- lm(PrizeMoney ~ DrivingAccuracy + GIR + PuttingAverage + BirdieConversion + SandSaves + Scrambling + PuttsPerRound, data = pga)
+plot(pgamodel) #use boxcox for non-normal Y
+invResPlot(pgamodel)
+summary(powerTransform(pgamodel))
+```
+
+I agree with this recommendation. From our diagnostic plots we can see that our normal QQ plots deviate quite a bit, so boxcox may be a good method of determining a transformation. Using both an inverse res plot and the boxcox method, both point to a log transformation being the best course of action.
+
+### (b) Develop a valid full regression model containing all seven potential predictor variables listed above. Ensure that you provide justification for your choice of full model, which includes scatter plots of the data, plots of standardized residuals, and any other relevant diagnostic plots.
+
+```{r}
+pga$PMLOG <- log(pga$PrizeMoney)
+pgamodel2 <- lm(PMLOG ~ DrivingAccuracy + GIR + PuttingAverage + BirdieConversion + SandSaves + Scrambling + PuttsPerRound, data = pga)
+summary(pgamodel2)
+plot(pgamodel2)
+mmps(pgamodel2)
+```
+
+Looking at our diagnostic plots, we can see that our residual plot has no clear pattern and a relatively consistent scatter. This fulfills both our constant variance condition as well as our trend condition. Looking at our normal QQ plot we can also see that our normality condition is met. Our mmps tell us that our fitted model draws close to the Loess line and therefore all of these reasons tell us that our model is valid.
+
+### (c) Identify any points that should be investigated. Give one or more reasons to support each point chosen. 
+
+```{r}
+(2*(5 + 1))/196
+```
+
+From our multivariate leverage equation we can see that the only bad leverage point is 168 as it is considered both a high leverage point as well as having a standardized residual outside of (-2,2). No other points meet these conditions.
+
+### (d) Describe any weaknesses in your model. 
+
+Other than the potentially bad leverage point, all other diagnostics seem to point to our model being an overall good fit. Transforming any of the predictor variables may lead to better fitting but will also potentially lead to overcomplication of our model. Therefore, I think our model is good as it is.
+
+### (e) The golf fan wants to remove all predictors with insignificant t -values from the full model in a single step. Explain why you would not recommend this approach. 
+
+I would not reccomend this approach as colinearity may skew the significance of our data. Some data that is significant may be displayed as insignificant and vice versa due to colinearity. Additionally, the addition/removal of certain variables may skew other variables that were once significant or insignificant.

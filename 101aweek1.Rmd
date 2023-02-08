@@ -1,0 +1,226 @@
+---
+title: "stats 101a week 1"
+author: "Joshua Susanto"
+date: "3/28/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+rain <- read.csv('rain-1.csv')
+head(rain)
+library('tidyverse')
+library('ggplot2')
+library('dplyr')
+library('knitr')
+```
+# list of what is in a dataset
+outliers
+number of obs 54057
+number of vars
+types of variables
+are there missing values
+how was this data collected
+what do the variables mean
+where are the locations -> how many are there?
+units of measurement
+timespan
+size of dataset (gb mb)
+
+```{r}
+str(rain) #tells you the type of variable for each colimn
+dim(rain) #gives you the shape of the dataset
+# is.na(rain) #lets you know which obervations are na
+sum(is.na(rain))
+```
+
+data moves
+
+#from dplyr
+filter(rain) #filters out rows you specify 
+arrange(rain)
+select()
+mutate()
+group_by()
+summarize()
+
+
+```{r}
+?filter
+rain1 <- filter(rain, PRCP >= 1)
+dim(rain1)
+```
+
+```{r}
+rain2 <- filter(rain, NAME == 'CULVER CITY, CA US')
+dim(rain2)
+```
+
+```{r}
+?arrange
+rain3 <- arrange(rain, desc(PRCP)) #desc = descending
+a <- max(rain3$PRCP,na.rm = TRUE)
+```
+
+```{r}
+rain4 <- group_by(rain, NAME)
+rain5 <- summarize(rain4, meanrf = mean(PRCP, na.rm = TRUE))
+# summarize makes a new column where its the mean of PRCP
+head(rain5)
+```
+
+pipe operator (takes whats on the left as input for the right)
+```{r}
+rain5 <- rain %>% group_by(NAME) %>% summarize(meanrf = mean(PRCP, na.rm = TRUE))
+head(rain5)
+```
+
+```{r}
+####select
+###create a tibble with only the Temp (e.g. those beginning with T) variables
+###create another tibble that excludes latitude and longitude
+
+mytibble <- select(rain, TAVG:TMIN)
+#or
+mytibble <- select(rain, TAVG, TMAX, TMIN)
+#there are other ways, too. SEe the  transform data cheat sheet and look for helper functions for select. For example:
+mytibble <- select(rain, starts_with("T"))
+####mutate
+######is elevation in feet or meters? Whichever it is, create a new variable in the new units.
+
+
+```
+
+
+
+Thursday
+
+dates
+- there are three classes for date variables
+  - date class
+  - POSIXct
+  - POSIXit
+- date classes store a date as the number since 1/1/1970
+- CT stores seconds since 1/1/1970
+- IT stores as a list, with separate elements for daat, mont, year, etc
+
+```{r}
+x <- as.Date('2022-03-31') # as date is always in THIS FORMAT
+as.numeric(x) 
+```
+
+format
+```{r}
+?strptime #will give you all the format codes that you need to convert dates
+d1 <- as.Date('03/31/22', format = '%m/%d/%Y') # your format has to be in quotes
+# this is wrong becuase Y means uppcercase year and y is 2 digit year
+d1 #incorrect
+```
+
+```{r}
+d2 <- as.Date('03/31/22', format = '%m/%d/%y')
+d2 #correct
+```
+
+practice
+```{r}
+d3 <- as.Date('03-31-2022', format = '%m-%d-%Y')
+d4 <- as.Date('03/31/22', format = '%m/%d/%y')
+d5 <- as.Date('March 31, 2022', format = '%B %d,%Y')
+d3
+d4
+d5
+```
+
+try these
+```{r}
+library('lubridate')
+d3 <- as.Date('03-31-2022', format = '%m-%d-%Y')
+day(d3)
+month(d3)
+year(d3)
+week(d3)
+mday(d3)
+wday(d3)
+```
+
+
+consider only LA county,
+what dates are included?
+how many neighborhoods?
+do all neighborhoods have same number of obs
+```{r}
+covid <- read.csv('covid.csv')
+head(covid)
+# unique(covid$date)
+# unique(covid$name)
+covid2 <- covid %>% arrange(desc(date))
+end <- covid2[1,'date']
+covid3 <- covid %>% arrange(date)
+start <- covid3[1,'date']
+range <- c(start,end)
+la <- covid %>% filter(county == "Los Angeles")
+unique(covid$fips)
+```
+
+when you get a dataset the first steo is to generate questions about the data rather than 
+blindly looking for patters
+
+ggplot
+
+- primary function is ggplot()
+   - takes 2 arguments
+    - data frame
+    - aes
+      - aesthetic that maps the variables in the data frame )position,size,color)
+    - built in later
+    
+components 9arguments)
+- date
+- aesthetic mappings
+- geo objects
+- stat transforming
+- scales
+- faceting (subgroups)
+
+p = ggplot(cdc #date, aes(weight,wtdesire) #columns) <- this gives an error bc u didnt give enough arguments like what type of geometric shape you want
+
+
+p = ggplot(cdc #date, aes(weight,wtdesire) #columns) 
+p + geom_point() #we want a scatter plot (THIS WORKS)
+
+
+Doing more
+
+p = ggplot(cdc #date, aes(weight,wtdesire) #columns) 
+p + geom_point(aes(colour = gender)) # in scatterplot we are specifying using aes that we want the color of our points to be seperated by the gender of the point, it will give a different colour for each unique gender value
+
+
+
+p = ggplot(cdc #date, aes(weight,wtdesire) #columns) 
+p + geom_point(aes(colour = gender), size - 1, alpha = 0.75) #size changes the point size and alpha changes opacity, any changes that can be made to the point is in geom_point(aes
+p+stat_smooth() #adds a line defaults to best fit curve
+#many examples in the fuckinininin notES!!
+
+```{r}
+data("iris")
+iris
+?grep
+?regexpr
+version
+vector <- c("c","meow")
+```
+
+
+
+
+
+
+
+
+
+
+

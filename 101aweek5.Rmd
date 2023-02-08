@@ -1,0 +1,77 @@
+---
+title: "101a week 5"
+author: "Joshua Susanto"
+date: "4/26/2022"
+output: html_document
+---
+
+```{r}
+library('tidyverse')
+loans <- read_csv('collegeloans.csv')
+head(loans)
+public <- loans %>% filter(type == 'public')
+private <- loans %>% filter(type == 'private NFP')
+unique(loans$type)
+plot(public$loan_avg_amount)
+plot(private$loan_avg_amount)
+```
+
+```{r}
+temp <- if_else(loans$type == 'public', 1 ,0)
+loans$is_public <- temp
+head(loans)
+boxplot(loans$loan_avg_amount  ~ loans$is_public)
+```
+
+mean function
+E(Y|X) --> what is the mean value of y when x is something
+
+```{r}
+plot(loans$loan_avg_amount  ~ loans$is_public)
+m1 <- lm(loans$loan_avg_amount  ~ loans$is_public)
+abline(m1)
+```
+^ plots the means together
+
+```{r}
+summary(m1)
+plot(m1)
+```
+we would get the mean for the second value by just addint the slope to the intercept one time
+
+```{r}
+all <- read_csv("collegeloansall.csv")
+table(all$type)
+m2 <- lm(all$loan_avg_amount ~ all$type)
+summary(m2) #everything is being compared to the first intercpt variable
+boxplot(all$loan_avg_amount ~ all$type)
+```
+can also use factors to make sure that it treated properly
+lm(y ~ factor(x))
+
+there will always be small variability in the qq plot so focus on the center and make sure there isnt too large of a deviance from the line and make sure there are no patterns
+
+outliers --> points that dont fit the trend
+leverage --> a point that will greatly change the model value if its y value is changed (usually high x variance)
+influential --> will
+
+if the fitted line goes through an outlier --> high leverage
+
+
+outlier x value --> high leverage
+
+
+good v bad leverage
+- good --> follows trend
+- bad --> does not, outlier
+  - no reason for the line being the way it is other than the fact that the leverage point is affecting it
+
+
+
+
+
+
+
+
+
+

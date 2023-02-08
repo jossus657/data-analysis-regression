@@ -1,0 +1,164 @@
+---
+title: "101a HW 6"
+author: "Joshua Susanto - 405568250"
+date: "5/5/2022"
+output: pdf_document
+---
+
+## First Problem. Chapter 3, #1b (note you do NOT have to do on a computer--you can use the provided output)
+
+### Does the ordinary straight line regression model (3.7) seem to fit the data well? If not, carefully describe how the model can be improved. Given below and in Figure 3.41 is some output from fitting model
+
+From the graphs and the R output we can see several points indicating that a linear model is a good fit for our data. From the R^2 value we can see that 94% of our variation is explained by our model. From the scatterplot and line of best fir we can see a significantly strong linear correlation between our two variables. However, from our standardized residuals we can see a strange cone shaped pattern in our residuals with outliers increasing as distance increases. We also see a potential bad leverage point in our data. This actually implies that our model may actually not be the best fit for out data. We can improve our model by transforming our data by potentially taking the log of the y variable or also even the x variable.
+
+## Second Problem. Chapter 3, #3, parts A, B and C.
+
+###  The price of advertising (and hence revenue from advertising) is different from one consumer magazine to another. Publishers of consumer magazines argue that magazines that reach more readers create more value for the advertiser. Thus, circulation is an important factor that affects revenue from advertising. In this exercise, we are going to investigate the effect of circulation on gross advertising revenue. The data are for the top 70 US magazines ranked in terms of total gross advertising revenue in 2006. In particular we will develop regression models to predict gross advertising revenue per advertising page in 2006 (in thousands of dollars) from circulation (in millions). The data were obtained from http://adage.com and are given in the file AdRevenue.csv which is available on the book web site. Prepare your answers to parts A, B and C in the form of a report. 
+
+
+### Part A
+### (a) Develop a simple linear regression model based on least squares that predicts advertising revenue per page from circulation (i.e., feel free to transform either the predictor or the response variable or both variables). Ensure that you provide justification for your choice of model.
+
+```{r}
+library('tidyverse')
+ad <- read_csv('AdRevenue.csv')
+model1 <- lm(AdRevenue ~ Circulation, data = ad)
+plot(model1)
+plot(AdRevenue ~ Circulation, data = ad)
+```
+
+
+As we can see from the scatter plot, there is a funnel shape to our data which implies that our residuals are not normally distributed. This idea is supported by our linear model diagnostic plots as we can see our residuals being clustered in only one area. From the normal QQ plot we can conclude that our condition of normally distributed residuals is not met as there is an obvious deviation from normality the larger our circulation is. Thus we can conclude that a regular linear model may not be a good fit for our data. 
+
+```{r}
+summary(ad$Circulation)
+summary(ad$AdRevenue)
+```
+When looking at the ranges of our variables we see a range large enough to consider taking the log of our variables.
+
+```{r}
+ad2 <- ad %>% mutate(CirculationLog = log(Circulation), AdRevenueLog = log(AdRevenue))
+model2 <- lm(AdRevenueLog ~ CirculationLog, data = ad2)
+plot(model2)
+plot(AdRevenueLog ~ CirculationLog, data = ad2)
+abline(model2)
+```
+
+
+### (b) Find a 95% prediction interval for the advertising revenue per page for magazines with the following circulations:
+### (i) 0.5 million
+
+```{r}
+int1 <- predict(model2, data.frame(CirculationLog = log(0.5)), interval = 'prediction', level = 0.95)
+int1
+```
+
+### (ii) 20 million
+
+```{r}
+int2 <- predict(model2, data.frame(CirculationLog = log(20)), interval = 'prediction', level = 0.95)
+int2
+```
+
+### (c) Describe any weaknesses in your model
+
+
+```{r}
+leverage = hatvalues(model2)
+sort(leverage[leverage > 4/nrow(ad)], decreasing = TRUE)
+```
+
+From our second model we can see vast improvements compared to the first. From our residual plot we can see evenly spread out points as well as relatively constant variation which satisfies our constant variation condition. Our normal QQ plot also sees improvement being relatively straight other than the ends where we expect the most variation from normality. We do still see a few outliers but this does not discredit the positives. We do see a few high leverage points but these points are not considered bad leverage points as they are contained within the (-2,2) range.
+
+### Part B
+### (a) Develop a polynomial regression model based on least squares that directly predicts the effect on advertising revenue per page of an increase in circulation of 1 million people (i.e., do not transform either the predictor nor the response variable). Ensure that you provide detailed justification for your choice of model. [Hint: Consider polynomial models of order up to 3.]
+
+Let us first consider a second order polynomial model
+```{r}
+model3 <- lm(AdRevenue ~ Circulation + I(Circulation^2), data = ad)
+plot(model3)
+abline(-2,0)
+abline(2,0)
+abline(v = 4/nrow(ad))
+```
+Now to observe a third order polynomial model
+```{r}
+model4 <- lm(AdRevenue ~ Circulation + I(Circulation^2) + I(Circulation^3), data = ad)
+plot(model4)
+abline(-2,0)
+abline(2,0)
+abline(v = 4/nrow(ad))
+```
+
+From our polynomial models we can see many different variations in our diagnostic plots. Our residual plot seems to have similar characteristics. We see a majority of the observations clumped into one area with the variation getting larger as circulation increases. This does not satisfy the constant variance condition of residuals. The normal QQ plot has a cubic shape in both our polynomial models with the third order one being even more pronounced. This does not support the normal distribution condition for residuals. We also get 3 bad leverage points in our 2nd order polynomial and 4 in our third order as seen in our diagnostic plots (cutoff lines for bad leverage included for reference). For this reason we will be sticking with the 2nd order polynomial.
+
+### (b) Find a 95% prediction interval for the advertising page cost for magazines with the following circulations:
+
+For this question I am not sure if we should find the interval for the model we chose in part a (which would be the second order model) or to do an interval for both so I did both just in case.
+
+### (i) 0.5 million
+
+Based on our second order model we get our interval to be:
+```{r}
+predict(model3, data.frame(Circulation = 0.5), interval = 'prediction', level = 0.95)
+```
+
+And for our third order model our interval is:
+```{r}
+predict(model4, data.frame(Circulation = 0.5), interval = 'prediction', level = 0.95)
+```
+
+### (ii) 20 million
+
+Based on our second order model we get our interval to be:
+```{r}
+predict(model3, data.frame(Circulation = 20), interval = 'prediction', level = 0.95)
+```
+
+And for our third order model our interval is:
+```{r}
+predict(model4, data.frame(Circulation = 20), interval = 'prediction', level = 0.95)
+```
+
+### (c) Describe any weaknesses in your model.
+
+```{r}
+leverage3 = hatvalues(model3)
+sort(leverage3[leverage3 > 4/nrow(ad)], decreasing = TRUE)
+```
+
+```{r}
+leverage4 = hatvalues(model4)
+sort(leverage4[leverage4 > 4/nrow(ad)], decreasing = TRUE)
+```
+
+From our second order polynomial model we can see many different variations in our diagnostic plots. Our residual plot seems to have glaring issues. We see a majority of the observations clumped into one area with the variation getting larger as circulation increases. This does not satisfy the constant variance condition of residuals. The normal QQ plot has a cubic shape in our 2nd order polynomial model. This does not support the normal distribution condition for residuals. We also get 3 bad leverage points in our 2nd order polynomial (cutoff lines for bad leverage included for reference). All of these point to the fact that our 2nd order polynomial model may not be the best fit for our data and that this model could definitely be improved upon.
+
+### Part C
+### (a) Compare the model in Part A with that in Part B. Decide which provides a better model. Give reasons to justify your choice.
+
+The model in part a is the better choice. Comparing these two models we can see that our diagnostic plots in part a satisfy both the constant variance and normal distribution condition for our residuals (based on our residual and QQ norm plots). However neither of these conditions are met in our polynomial models. Additionally, while our model in part a has high leverage points, none of them are outside the (-2,2) threshold and therefore are not bad leverage points. While we have at least 3 bad leverage points in any of our polynomial models. All of these facts point to our model in part a to be the better fit.
+
+### (b) Compare the prediction intervals in Part A with those in Part B. In each case, decide which interval you would recommend. Give reasons to justify each choice. 
+
+In order to compare these intervals we first must convert our values in our part a model by reversing the logarithm. We thus get our 0.5 million and 20 million intervals to be:
+
+```{r}
+exp(1)^int1
+exp(1)^int2
+```
+
+Comparing these intervals for our 0.5 million prediction we can see that our interval from part a has a smaller range which implies that our interval is more precise than the intervals given in our polynomial models. So in this case our logarithmic model would be best. However, for our 20 million intervals we can see the opposite trend. Our interval from part a is significantly larger than our polynomial intervals which implies that our models from part b would be the best choice. 
+
+## Third Problem. In 3.2.6, pg. 74, the author writes "In this special case, it is possible to directly calculate the standard deviation of Y at each discrete value of x" and provides the results of these calculations in Table 3.6
+### a) Explain how you would calculate those values in Table 3.6 if you had the data.
+
+I assumed that this question meant how I would process this data given a software. I would use R in this case.
+
+I would group the data for every x value using the group_by() and then take the square root for each of these groups using the summarize() function. My code would look something like this:
+
+data %>% group_by(x) %>% summarize(SDbyX = sd(y, na.rm = TRUE))
+
+### b) Explain why this is a "special case". In other words, why can't we directly calculate the standard deviation at each value of x in usual cases. (For example, for the datasets in parts A and B.)
+
+This is a special case because this is discrete data. With discrete data we are able to group by discrete points and therefore are able to efficiently process data by finding the standard deviation for each value of x. The datasets in part A and B have way too many x values due to the data being continuous. It is simply not efficient and not worthwhile to directly calculate these standard deviations as continuous data could theoretially have infinite amounts of x values.

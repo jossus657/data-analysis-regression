@@ -1,0 +1,241 @@
+---
+title: "101a HW 3"
+author: "Joshua Susanto - 405568250"
+date: "4/14/2022"
+output: pdf_document
+---
+
+## 1) Use the armspan.csv data collected from this class. 
+You will probably need to clean the data before answering these questions. You should justify your choices and decisions for cleaning.
+
+```{r}
+library(tidyverse)
+armspan <- read_csv('armspan2022_cleaner.csv')
+colnames(armspan) <- c('timestamp','height','armspan','taller_than_father','taller_than_mother')
+```
+
+
+### a) Make a plot showing the relationship between armspan and height. Your plot should have armspan on the y-axis. Interpret the plot by describing the trend, strength, and unusual features, if any.
+
+```{r}
+plot(armspan$armspan ~ armspan$height, xlab = 'height (in)', ylab = 'armspan (in)')
+```
+
+We see a positive linear trend meaning that armspan tends to increase as height increases. The strength of the relationship looks strong as the points do not seem to scatter too much. There is one point that seems like a single point that is further away from the main cluster of points, but this single value also seems to follow the general trend when imagining a fitted line of the data.
+
+### b) Fit a linear model for predicting armspan given height. Report the equation of the estimated line. Superimpose the model on the plot you made in part (a).
+
+```{r}
+lm_arm <- lm(armspan$armspan ~ armspan$height)
+summary(lm_arm)
+plot(armspan$armspan ~ armspan$height, main = 'Armspan v Height', xlab = 'Height (in)', ylab = 'Armspan (in)')
+abline(lm_arm, col = 'purple')
+```
+
+$Y_i = -29.63530 + 1.42459x_i$
+
+
+### c) Based on the linear model, what is the predicted armspan for your height? What is the residual ?
+
+Since I am 72 inches tall, I can predict my height by substituting 72 into our linear model equation.
+```{r}
+my_armspan <- -29.63530 + (1.42459*72)
+print(my_armspan)
+```
+
+My actual armspan is 70 inches. I can find the residual by subtracting my actual armspan from my predicted armspan
+```{r}
+70 - my_armspan
+```
+
+
+### d) Michael Phelps' success as a swimmer has been attributed to his unusually long armspan, relative to his height. His armspan is three inches greater than his height. (He is 76 inches tall.) Based on these data, does this seem unusual to you? Why or why not?
+
+```{r}
+summary(lm_arm)
+phelps_armspan <- -29.63530 + (1.42459*76)
+phelps_armspan
+phelps_residual <- 79 - phelps_armspan
+phelps_residual
+```
+We can see from the linear model summary that the standard deviation of our residual is about 2.135 inches. From our linear model we predicted that Phelp's armspan should be about 78.6 inches. Since his actual armspan is 79, that would make our residual for Phelp's armspan be about 0.366 inches. This residual is well below even one standard deviation, thus as residuals should be normally distributed, this is not an unusual value.
+
+### e) Make a residual plot and explain what it tells us about the linear model.
+
+```{r}
+plot(lm_arm$residuals ~ armspan$height[-33], ylab = 'Residuals', main = 'Residual Plot', xlab = 'Height (in)')
+abline(0,0, col = 'blue')
+```
+
+This residual plot looks scattered with no trend. This tells us that our linear model is a good fit for the data. 
+
+## 2) The command lm(y~x) fits this model: y = a + b x. In this exercise, you're going to explore what happens when you fit this model and yet the data do not follow.
+
+
+### a) In the last homework you wrote a function that generates data that follow the linear model. Write a new function that generates data that has a quadratic trend between x and y: a + bx + cx^2 
+
+### Input to this function should be a,b,c, sigma, x=rep(1:10,by=.1,4), random.seed
+### Output is a vector of length(x). The model is y = f(x) + epsilon, where epsilon is N(0,sigma), and f(x) is any non-linear function you choose. Produce a scatterplot showing the relationship between y and x for any values of the input parameters you choose.
+
+```{r}
+quadratic <- function(a, b, c, sigma, x = rep(1:10 ,by=.1, 4), random.seed) {
+  set.seed(random.seed)
+  epsilon <- rnorm(length(x), 0, sigma)
+  output <- a + (b* x) + (c * (x^2)) + epsilon
+}
+```
+
+```{r}
+output <- quadratic(1, 2, 3, 4, rep(1:10 ,by=.1, 4), 1234)
+input <- rep(1:10 ,by=.1, 4)
+plot(output ~ input)
+```
+
+
+### b) Now fit a linear model using lm() function applied to the x variable and your generated y variable. This model is not correct (because it assumes the trend is linear but the data you have generated do not follow a linear trend.) Make a plot of the residuals against the x variable. Describe what you see.
+
+```{r}
+my_lm <- lm(output ~ input)
+plot(output ~ input)
+abline(my_lm, col = 'red')
+
+plot(my_lm$residuals ~ input, ylab = 'residuals', xlab = 'input')
+abline(0,0, col = 'green')
+```
+
+The normal plot seems to follow the fitted line well, however, from the residual plot we can see that there is a clear trend in the residuals. 
+
+### c) In class we discussed that if the residual plot shows no features, then this indicates that the correct model was fitted. How can we use the residual plot to tell if the trend is non-linear?
+
+Since this residual plot does have a trend we can conclude that this distinct feature implies that our relationship betweent the 2 variables is not linear. Therefore, a linear model is not a good fir for our data.
+
+### d) Now write a function that generates data that follows a linear trend but has non-constant standard deviation in the error terms. Specifically:
+### y = a + bx + epsilon where epsilon is N(0, sigma*x^2) for a scalar sigma.
+### Input: a, b, x, sigma, random.seed
+
+### Use x = rep(1:10, by = .1, 4), a = 1, b = 200, sigma = 5, random.seed=123
+
+### Make a scatterplot of y versus x and describe it.
+
+```{r}
+linear <- function(a, b, x, sigma, random.seed){
+  set.seed(random.seed)
+  epsilon <- rnorm(length(x), 0, sigma*x^2)
+  output <- a + b*x + epsilon
+}
+```
+
+```{r}
+output2 <- linear(1, 200, rep(1:10, by = .1, 4), 5, 123)
+input2 <- rep(1:10, by = .1, 4)
+plot(output2 ~ input2, xlab = "input", ylab = "output")
+```
+
+From this graph we can see the variance grow as our x value grows. Our scatter gets stronger and thus the strength of our linear relationship gets weaker.
+
+### e) Now use lm() to fit the model, using the y values you generated in (d). Note that the model you fit will be incorrect, because it assumes that the standard deviation of the error terms is a constant and yet the data you generated varies the standard deviation based on the value of x. Created a residual plot. What about the residual plot indicates that the "constant standard deviation" assumption was violated?
+
+```{r}
+my_lm2 <- lm(output2 ~ input2)
+plot(output2 ~ input2)
+abline(my_lm2, col = 'orange')
+plot(my_lm2$residuals ~ input2)
+abline(0,0, col = 'pink')
+```
+
+The fact that there is a trend to the residual plot (the same trend in the actual scatterplot) means that this residual plot is not a good fit. We see that variation of the residuals grow as x grows and that it is not consistently scattered. Therefore a linear model is not a good fit for our data.
+
+## 3) Import the ATUS data (american time use survey). (Note that these data are under Site Info on CCLE. In addition to the data themselves, there is a file describing the variables.) Is the amount of time spent on homework associated with the amount of time spent sleeping? To answer this, first modify the dataset so that we exclude people who did no homework: atus1 <- subset(atus,homework>0)
+
+```{r}
+atus <- read_csv("atus.csv")
+```
+
+### a) Make a scatterplot (with time spend on homework on the vertical axis) and fit a linear model and use these to describe the association (if any) between homework and sleep times.
+
+```{r}
+atus1 <- subset(atus,homework > 0)
+plot(atus1$sleep, atus1$homework)
+atus_lm <- lm(atus1$homework ~ atus1$sleep, ylab = "homework time spent (min)", ylab = "Amount Slept (min)")
+abline(atus_lm, col = 'blue')
+```
+
+
+### b) Make a residual plot (residuals against time spent sleeping). What do you learn?
+
+```{r}
+plot(atus_lm$residuals ~ atus1$sleep, main =  'Residual Plot', xlab = ' Amount Slept (min)', ylab = 'Residual')
+abline(0,0, col = 'red')
+```
+
+The residual seemed randomly scattered as does the normal scatterplot. We see that in the plot of our data there seems to be no real linear trend with many outliers outside the main cluster of points. We see this same behavior with the residual plot with many largely fluctuating residual patterns. This implies that there is no correlation between the two variables.
+
+## 4)
+
+### a) Using the ATUS data, carry out a hypothesis test to determine whether those who identified as female spent, on average, more time doing household chores than did those who identified as male. State hypotheses, the test statistic you use, the observed value of the statistic, the p-value, and your conclusion using a 5% significance level. 
+
+For this problem our null is:
+
+$H_0: \mu_f - \mu_m = 0$
+
+where $\mu_m =$ average time spend by a male doing household chores
+and $\mu_f =$ average time spend by a male doing household chores
+
+and our alternate hypothesis is:
+
+$H_a: \mu_f - \mu_m > 0$
+
+Our observed value would be
+
+```{r}
+male <- atus %>% filter(gender == 'Male')
+female <- atus %>% filter(gender == 'Female')
+mu1 <- mean(male$household_chores)
+mu2 <- mean(female$household_chores)
+mu1 - mu2
+```
+
+
+We get our t-statistic below: 
+```{r}
+male <- atus %>% filter(gender == 'Male')
+female <- atus %>% filter(gender == 'Female')
+t.test(male$household_chores, female$household_chores, alternative = 'greater')
+```
+Our test statistic is about 20.381, and our corresponding p-value < 2.2e-16. Since our p-value is much smaller than our significance value of 5%, we reject the null hypothesis as there is sufficient evidence to. Therefore we can conclude that there is enough statistical evidence to support that those who identified as female spent, on average, more time doing household chores than did those who identified as male.
+
+### b) What conditions must hold in order for your p-value to be accurate? What reasons do you have to believe that these conditions are or are not met in this situation?
+
+Our data needs to be random and independent. We must also have a large sample size (which we do). By being random, our data must be free of any time bias, which may have occurred here. Our data may not have been from enough diverse parts of the country and of random age groups. 
+
+## 5) Write a function (in R) that generates data according to the linear model.
+
+### Input: beta_0, beta_1, sigma, x (x is a vector of length n), random number seed.
+
+### Output: vector of length n, represent Y
+
+### try it with x <- rep(1:10,by=.1,4)
+
+### random.seed=123
+
+### beta_0=1
+
+### beta_1=3
+
+### sigma=3
+
+```{r}
+linear_generate <- function(beta_0, beta_1, sigma, x, random.seed){
+  set.seed(random.seed)
+  epsilon <- rnorm(length(x), 0, sigma)
+  output <- beta_0 + beta_1*x + epsilon
+}
+```
+
+```{r}
+x <- rep(1:10,by=.1,4)
+y <- linear_generate(1, 3, 3, x, 123)
+plot(y ~ x)
+```
+
+

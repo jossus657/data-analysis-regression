@@ -1,0 +1,27 @@
+---
+title: "101aweek6"
+author: "Joshua Susanto"
+date: "5/3/2022"
+output: html_document
+---
+
+```{r}
+mag <- read_csv("magazines.csv")
+model1 <- lm(AdRevenue ~ AdPages, data = mag)
+plot(model1) 
+#how do we know the y value?
+# y is usually what we want to predict while our x value is what we know or have control over, which makes sense in this scenario
+```
+
+
+transformations
+- we have 9 potential models. we can take log or sqrt of either x or y
+- best way to do this is to change your data frame to add these new transformations
+
+```{r}
+
+plot(AdRevenue ~ AdPages, data = mag)
+abline(model1)
+```
+
+

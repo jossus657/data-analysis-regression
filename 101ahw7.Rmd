@@ -1,0 +1,182 @@
+---
+title: "101a HW 7"
+author: "Joshua Susanto - 405568250"
+date: "5/12/2022"
+output: pdf_document
+---
+
+## A) Load the waistweightheight dataframe into R. The objective of this exercise is to understand why we need hypothesis tests to help us decide whether to add new variables and why we need adjusted R-squared.
+
+```{r}
+library("tidyverse")
+wwh <- read.delim('waistweightheight.txt', sep = '\t')
+str(wwh)
+```
+
+### a) First, fit a model that predicts Weight using waist size and height.
+
+```{r}
+wh <- lm(Weight ~ Waist + Height, data = wwh)
+summary(wh)
+```
+
+### i) Find and report SYY, SSReg, and RSS
+
+```{r}
+anova(wh)
+358074 + 29843 + 50259
+358074 + 29843 
+```
+
+$$ SYY = 438176$$
+$$ SSReg = 387917$$
+$$ RSS = 50259$$
+
+### ii) Report R-squared and adjusted R-squared
+
+$$ R^2 = 0.8853 $$
+$$ R^2_{adj} = 0.8848 $$
+
+### iii) Interpret the slope for height.
+
+For those with the same waist size, there is an expected average increase of about 2.4884 pounds in weight per unit increase in height.
+
+### iv) Does interpreting the slope for height using the phrase “as height increases…” make sense? How about if we replace height with waist size?
+
+It doesn't make complete sense as this phrase fails to account for the weight being controlled. Additionally, this phrasing implies causation rather than correlation. Using less restrictive vocabulary to define the relationship would work better. It would make less sense with waist size becuase the slope for height would have waist being a controlled variable, so there would be no increase in weight.
+
+### b) We’re now going to add a variable to our model that is useless. To do this:
+
+```{r}
+set.seed(23)
+wwh2 <- transform(wwh, worthless = rnorm(dim(wwh)[1],0,5))
+whworthless <- lm(Weight ~ Waist + Height + worthless, data = wwh2)
+summary(whworthless)
+```
+
+
+### i) Find and report SYY, SSReg, and RSS, and SSreg due to the variable worthless
+
+```{r}
+anova(whworthless)
+358074 + 29843 + 41 + 50218
+358074 + 29843 + 41
+```
+
+$$ SYY = 438176$$
+$$ SSReg = 387929$$
+$$ RSS = 50247$$
+
+$$ SSReg_{worthless} = 12$$
+
+### ii) Comment on how these have changed from (a).
+
+We can see that SYY stayed the same. This because SYY never changes as its an intrinsic characteristic of the Y value. SSReg seemed to slightly increase while RSS seemed to slightly RSS. This is because when we add a random variable SSReg must increase or stay the same and since we are using a random variable we will almost always see an increase in these values by adding a variable.
+
+### iii) How has R-squared and adjusted R-squared changed from (a)?
+
+We see that the R-squared value slightly increases while the adjusted R-squared value slightly decreases.
+
+### c) Repeat (b) but this time put worthless in the model first. Comment on how the terms have changed from (b).
+
+```{r}
+worthless <- lm(Weight ~ worthless + Waist +Height, data = wwh2)
+anova(worthless)
+```
+
+We see SSReg explained by worthless increase from 12 to 58. This is because when added first, worthless explains  SYY with considerations to no other variables. And since this variable is random; we see that wither a higher pool of SYY to explain we see an expected increase in SSreg(worthless). Whereas the SSreg(useless) we found in the previous part accounted for the other variables explaining portions of the SYY. 
+
+### d) Which do you think is a more reliable guide as to whether a new variable should be added, Rsquared or adjusted Rsquared? Why?
+
+Adjusted R squared because it accounts for how many variables are in the model whereas R squared does not do this. Therefore, when a useless variable is added R squared cannot decrease whereas adjusted R squared can and will be more reliable for variable addition.
+
+### e) Why can’t we just look at SSreg to decide whether to add a new variable (following the rule if SSreg gets bigger, add the new variable)? Why do you think partial tests are useful for telling us whether we should add a new variable?
+
+We can't just look at SSreg because SSreg will always either increase or stay the same when a value is added. When a variable is added more of the regression (even if this amount is minuscule) explains the total variation, therefore this is not a reliable tool to decide whether or not to add a new variable. Partial tests are more useful because we can see if it is significant to add a new variable and to see what this variable does (or doesn't) do to the model.
+
+## B) Upload the data cars04. Fit a model to predict Suggested RetailPrice using all of the remaining numerical variables, but exclude Vehicle.Name and Hybrid.
+
+```{r}
+cars <- read_csv('cars04.csv')
+cars2 <- cars[,-1:-2]
+carmodel <- lm(SuggestedRetailPrice ~ ., data = cars2)
+summary(carmodel)
+```
+
+
+### a) Why did we exclude Vehicle.Name? (Hint: you might want to try to fit a model with it and see what happens, and then explain why this happens.)
+
+```{r}
+cars2$vehicle <- cars$`Vehicle Name`
+carmodel1 <- lm(SuggestedRetailPrice ~ ., data = cars2)
+summary(carmodel1)
+```
+
+
+Vehicle name is insignificant to our model as it is merely an indicator variable that has no numeric worth. This is a categorical variable that adds no significance to our established linear model. Therefore, we can see that adding it to our model fundamentally does nothing and is not significant at all. 
+
+### b) write the equation of the fitted model
+
+```{r}
+carmodel$coefficients
+```
+
+$$ y = 349.98 + 1.05\beta_1 - 32.25\beta_2 + 228.33\beta_3 + 2.36\beta_4 - 16.72\beta_5 + 46.76\beta_6 + 0.70\beta_7 + 27.05\beta_8 - 7.32\beta_9 - 84.71\beta_{10} $$ 
+
+### c) Using the summary command, report the estimated slope, the t-statistic and the p-value for the Cylinders variable. What can we conclude from this t-statistic and p-value? (Assume that all necessary model conditions are valid.)
+
+```{r}
+summary(carmodel)
+```
+Slope = 228.32952   
+t-value = 3.171 
+p-value = 0.001730
+
+From these values we can conclude that it is statistically significant to include cylinders in our model. Since our p-value is smaller than our significance level we can reject the assumption that the slope for cylinders should be 0 and that our modeled slope for cylinders could be included in our linear model.
+
+### d) Show how to get the t-statistic value for Cylinders using the anova() command.
+
+```{r}
+carstemp <- cars[,-1:-2]
+carstemp <- carstemp %>% select(-Cylinders)
+cmod <- lm(SuggestedRetailPrice ~ .,data = carstemp)
+anova(update(cmod, .~. +cars$Cylinders))
+```
+
+We see that from this table we get 1.0058e+01 as our F value. Taking the square root of this should give us our desires t-statistic.
+
+```{r}
+sqrt(1.0058e+01)
+```
+
+
+### e) Report and interpret the F-statistic from the summary() command.
+
+
+The summary command tells us the significance given all the other variables in the model. Therefore, the F statistic given in the summary command tells us how significant adding cylinders as a variable is into the model given that all other numeric variables are included. Since our value is 10.058, which corresponds to a p value of 0.001730 (according to the anova table), we can say that considering all other variables it is still significant to include cylinders in our model of suggested retail price.
+
+
+### f) Carry out a test to determine whether the full model is better than a model that excludes both CityMPG and HighwayMPG. In other words, test the hypothesis that fuel consumption has no affect on the suggested retail price.
+
+```{r}
+carstemp2 <- cars[,-1:-2]
+carstemp2 <- carstemp2 %>% select(-CityMPG, -HighwayMPG)
+fullmodel <- carmodel
+MPGmodel <- lm(SuggestedRetailPrice ~. , data = carstemp2)
+anova(fullmodel)
+anova(MPGmodel)
+5.8714e+10 + 7.7453e+06 + 2.7222e+06 + 7.0394e+05 + 2.1856e+05 + 2.1052e+05 + 1.2563e+06 + 3.9621e+04 + 1.6483e+06 + 2.2271e+06 #ssreg(full)
+5.8714e+10 + 7.7453e+06 + 2.7222e+06 + 7.0394e+05 + 5.3446e+05 + 7.3600e+02 + 1.4322e+06 + 1.4236e+06 #ssreg(reduced)
+```
+$$ SSreg_{full} = 58730771841 $$
+
+$$ SSreg_{reduced} = 58728562436 $$
+```{r}
+n = (58730771841 - 58728562436) / 2 
+d= 63178000 / (234 - 10 - 1) 
+F = n/d
+```
+
+
+
+From our summary statistics we can see that for our full model Multiple R-squared: 0.9989 and Adjusted R-squared: 0.9989. While our reduced model has Multiple R-squared: 0.9989 and	Adjusted R-squared: 0.9988. These are very similar values and therefore there is no clear sign just from looking at R-squared alone. However when we look at our hypothesis tests, we get our corresponding p-value to be 0.978. Since our p-value is greater than our significance value (0.05) we fail to reject the null hypothesis.  Therefore there is not enough evidence to reject the null hypothesis. Therefore, by failing to reject the null we can still say that adding CityMPG and HighwayMPG are not significant to our model given that our model has every other numerical variable.

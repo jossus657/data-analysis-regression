@@ -1,0 +1,54 @@
+---
+title: "1o1aexam5"
+author: "Joshua Susanto"
+date: '2022-06-05'
+output: html_document
+---
+
+```{r}
+library('tidyverse')
+library('car')
+```
+
+
+```{r}
+mini <- read_csv("miniExam5.csv")
+mini$Year <- as_factor(mini$Year)
+model <- lm(amazon_price ~. , data = mini)
+```
+
+```{r}
+invResPlot(model)
+```
+
+```{r}
+summary(powerTransform(model))
+boxCox(model)
+```
+
+```{r}
+mini$logamazon <- log(mini$amazon_price)
+model_log <- lm(logamazon ~ Availability + Size + price + Pieces + Year + Pages + Unique_Pieces, data = mini)
+summary(model_log)
+plot(model_log)
+mmp(model_log)
+```
+
+```{r}
+summary(model)
+plot(model)
+mmp(model)
+```
+
+```{r}
+mini$amazon_inv <- (mini$amazon_price)^(1.13)
+model_inv <- lm(amazon_inv ~  Availability + Size + price + Pieces + Year + Pages + Unique_Pieces, data = mini)
+plot(model_inv)
+summary(model_inv)
+mmp(model_inv)
+```
+
+```{r}
+summary(powerTransform(cbind(mini$amazon_price, mini$price, mini$Pieces, mini$Pages, mini$Unique_Pieces)~1))
+```
+

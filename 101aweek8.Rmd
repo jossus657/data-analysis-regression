@@ -1,0 +1,22 @@
+---
+title: "101a week 8"
+author: "Joshua Susanto"
+date: "5/17/2022"
+output: html_document
+---
+
+```{r}
+library('tidyverse')
+births <- read_csv('cigbirths.csv')
+#interactive slope -> for smokers the rate is 0.01 less with respect to weeks
+#not a negative slope --> a less than slope
+```
+
+
+```{r}
+salary <- read_csv('salary.csv')
+model1 <- lm(Salary ~ Expernc, data = salary)
+model2 <- lm(Salary ~ Expernc + Gender, data = salary)
+model3 <- lm(Salary ~ Expernc + Gender, data = salary)
+```
+

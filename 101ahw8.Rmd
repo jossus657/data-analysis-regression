@@ -1,0 +1,176 @@
+---
+title: "101a HW 8"
+author: "Joshua Susanto - 405568250"
+date: "5/20/2022"
+output: pdf_document
+---
+
+```{r}
+library("tidyverse")
+library("lattice")
+library("car")
+```
+
+## 1) The file realty.txt combines house prices for four neighborhoods in Los Angeles. (You've seen subsets of this data set already). Upload this file.
+
+```{r}
+realty <- read.delim("realty.txt", sep = '\t')
+head(realty)
+```
+
+Our goal is to predict the cost of a house. If you type:
+
+```{r}
+table(realty$type)
+```
+
+you will see that there are some non-house types listed: Land, Mobile, and no type value provided. ("SFR" is single family residence, Condo/Twh is "condo/townhouse".) As a first step, let's keep only the SFR and Condos:
+
+```{r}
+realty2 <- subset(realty, type == "Condo/Twh"| type== "SFR")
+```
+
+There's still a problem. Some houses have no sqft and some have no bathrooms. Let's eliminate these:
+
+```{r}
+realty3 <- subset(realty2, sqft > 0 & bath > 0)
+```
+
+Finally, we will work with the log transform of price:
+
+```{r}
+realty4 = transform(realty3, lprice=log(price))
+```
+
+If all went well, you should have 1555 observations and 10 variables.
+
+### a) Fit a model that predicts the log of price with city, bed, bath, and sqft. Assuming conditions of the model hold, interpret the intercept. (Be sure to specify data=realty.new in your lm command.)
+
+```{r}
+model1 <- lm(lprice ~ city + bed + bath + sqft, data = realty4)
+summary(model1)
+exp(1.327e+01)
+```
+
+The intercept tells us that the logged price of houses is about 1.221e+01, or an actual price of 579545.80 considering the house is in Long Beach and has no beds, bath, or square footage.
+
+### b) Interpret cityWestwood. (Hint: what cities are in the dataset?) Which city is most expensive, on average? Which least?
+
+```{r}
+summary(model1)
+```
+
+Considering bed, bath, and square footage are all constant, there is an decrease in log price of about -6.161e-01 for Westwood houses when compared to houses in Beverly Hills. Since all other intercepts for cities are also decreasing this would imply that Beverly Hills has the most expensive houses on average while Westwood has the cheapest.
+
+### c) Are more bedrooms more valuable? Interpret the meaning of the bed variable.
+
+We see from our summary table that considering all other variables are included in the model, bed is still significant to our model as our p-value is well below 0.05. From the bed variable we can see that considering all other variables are kept constant, we see an average increase in log house price of about 1.744e-01 for every unit increase in bed.
+
+### d) The p-value for bath is high. What does this mean?
+
+This means that when all other variables are included in our model, the bath variable is not statistically significant enough to include. In other words, the inclusion of the bath variable in our model is not necessary and is more likely hurting rather than helping our model.
+
+### e) Fit the model again without the variable "bed". Why is "bath" now significant? (hint: try the update() command.)
+
+```{r}
+model2 <- update(model1, ~ .-bed)
+summary(model2)
+```
+
+Since bed is now not in the model, it leaves more total variation to be potentially explained by the other variables. In this case, since we removed bed from our model, bath ended up explaining enough additional variation to be considered significant in our model.
+
+### f) Make a lattice plot of log(price) against bathrooms, controlling for the number of bedrooms and write a sentence or two interpreting the plot. What does this plot tell us about the need for including both bed and bath in the same model? (Hint: See below)
+
+```{r}
+xyplot(lprice~bath| bed, realty4)
+```
+
+The lattice plot implies that the relationship between log price and bath is not the same for different amounts of bedrooms. We see different relationships, some linear and some with no correlation, and different magnitudes of correlations between the different amounts of bedrooms. This tells us that the bed variable should be included in our model as it explains some variability in our data.
+
+### g) The model we've fit so far assumes that the relation between log(price) and size (measured by sqft) is the same in each city. Does this seem like a valid assumption? To check make and interpret the lattice plot:
+
+```{r}
+xyplot(lprice~sqft| city, realty4)
+```
+
+This does not seem to be a valid assumption. From the lattice plot we can see differing degrees of correlation and different slopes for each city. This would imply that cities should be included in our model.
+
+### h) Fit two "small" models as follows:
+
+```{r}
+msmall <- lm(price~bed+bath+sqft,data=realty4)
+msmall.log <- lm(lprice~bed+bath+sqft, data=realty4)
+```
+
+Note that the first model does not use the log transform.
+
+### Find marginal model plots for both models ( car::mmps(msmall). Interpret the plots and explain which of the two models, based on these plots, is best. (Hint: you may need to load the car library.)
+
+```{r}
+car::mmps(msmall)
+car::mmps(msmall.log)
+```
+
+
+Based on our plots we can see that our model for bed is very much better with our transformed model. The other two variables also look like they are fitted better with our transformed model at first glance. Additionally, when we see our overall fitted values model, we can see that our transformed model fits to our data extremely close. We can see that our line is consistent with the trend with our data. Therefore, we can conclude that our transformed model is best.
+
+## 2) Revisit the salary.csv data. For this problem, we will focus only on two predictors: Expernc (years of experience) and Gender.
+
+```{r}
+salary <- read_csv("salary.csv")
+```
+
+### a) Fit a model that has different intercepts for men and women. Interpret the intercept.
+
+```{r}
+smodel <- lm(Salary ~ Gender + Expernc, data = salary)
+summary(smodel)
+36724+4670.5
+```
+
+Our intercept tells us that on average, Men get paid 4670 more (41394.5) than women with no experience (36724). But experience will on average increase both men and womens' salaries equally.
+
+### b) Fit a model that has different slopes AND different intercepts for men and women. Report the intercept and slope for men and the intercept and slope for women (ignoring for the moment the notion of statistical significance.)
+
+```{r}
+smodel2 <- lm(Salary ~ Expernc*Gender, data = salary)
+summary(smodel2)
+```
+
+Intercept (Men): 
+```{r}
+38342.43 + 1952.10
+```
+
+Intercept (Women): 
+```{r}
+38342.43
+```
+
+Slope (Men):
+```{r}
+-49.42 + 541.76
+```
+
+Slope (Women):
+```{r}
+-49.42
+```
+
+
+### c) Fit a model that has different slopes for men and women but the SAME intercept. Interpret the slopes.
+
+```{r}
+smodel3 <- lm(Salary ~ Expernc + Expernc:Gender, data = salary)
+summary(smodel3)
+```
+
+The slopes tell us that women on average are paid -213.3 less as experience increases. This also tells us that men are paid more for their years of experience. While men, on average get paid an additional 604.20 per years of experience; women get paid 213.30 less per years of experience.
+
+## 3) Using the model in 2c, find the marginal model plot with respect to Expernc. what does it suggest concerning the validity of the model?
+
+```{r}
+car::mmps(smodel3)
+```
+
+The MMP tells us that our model deviated a bit from our data but not an extreme amount. I think this small deviation is natural in any model so I would say that it doesn't necessarily debunk the validity of our model (meaning our model is still valid). However, it is an implication that we could build another model that fits the data better than our current model. 

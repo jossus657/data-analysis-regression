@@ -1,0 +1,87 @@
+---
+title: "101a Final Exam"
+author: "Joshua Susanto"
+date: '2022-06-05'
+output: html_document
+---
+
+1.
+```{r}
+library("tidyverse")
+library("car")
+lego <- read_csv("finalexamLego.csv")
+lego$Year <- as_factor(lego$Year)
+legomodel <- lm(amazon_price ~ ., data = lego)
+summary(legomodel)
+```
+
+2.
+```{r}
+plot(legomodel)
+```
+
+Looking at our residual plot trend isn't the issue we should be worried about. We can clearly see a fan shape on our plot. This indicated that the constant variance condition is not fulfilled and thus our model is not valid. As our x value grows we can see more spread and variance which leads to a fan shape. However, the scatter still seems random and thus there is no issue with trend.
+
+
+3. Transform only the amazon_price and price variables by taking the log of each.  Fit a new model that predicts the log of the amazon price as a function of the remaining variables, including the log of price (be sure to not include price and instead use the transformed price.)
+
+
+```{r}
+lego$logamazon  <- log(lego$amazon_price)
+lego$logprice <- log(lego$price)
+legomodel2 <- update(legomodel, logamazon ~. - price + logprice, data = lego)
+summary(legomodel2)
+plot(legomodel)
+plot(legomodel2)
+mmp(legomodel)
+mmp(legomodel2)
+```
+
+Based on our diagnostic plots we can see that our transformed model is overall better than our untransformed model. From our residual plot we can see that the scatter in our untransformed model gets larger as our x value grows. This causes a fan shape to appear in the residual plot of our untransformed model. Therefore, we can conclude that the constant variance condition is not met with this model. Additionally, looking at the normal QQ plot of our untransformed model we can see that there is large deviances from the normal line and can therefore conclude that the normal variance condition is also not supported. Looking at the marginal model plot for this model we can see deviations between the data and our fit, which tells us that our trend condition may not be fulfilled. Conversely, when looking at our transformed model we see that our residual plot shows constant variance, with an even scatter throughout. This tells us that the constant variance condition is met for this model. Additionally, our normal QQ plot for this model also seems to follow our normal line relatively well, satisfying our normaility condition. Finally, the mmp of this model shows our fit to be extremely close to the Loess line, indicating that trend is also not an issue in our model. All of these things point to our untransformed model being invalid while our transformed model is much stronger and valid. Therefore, we can conldude that our transformed model is preferred.
+
+4.
+Assume that your chosen model is valid. Note that the variable Pieces is not significant at the 0.05 level.  If we intend to use a significance level of 5%, explain why it might not be a good idea to conclude that Pieces is statistically insignificant. (In other words, explain why it might not be a good idea to conclude that the true slope is 0.)
+
+```{r}
+summary(legomodel2)
+```
+
+Since we are working with many other variables, colinearity could definitely come into play and skew our measurements of significance. Therefore, it may be displayed as insignificant when it really is. Additionally, this model is considering that all other variables are present, and considering that the p value is very close to the significant level, it is risky to target this one rather than one with a much larger p value.
+
+5.
+```{r}
+require(leaps)
+library("car")
+bestlego <- regsubsets(logamazon ~ Availability + Pieces + Year + Pages + Unique_Pieces + Size + logprice, data = lego, nvmax = 7)
+summary(bestlego)
+biclego <- summary(bestlego)$bic
+which(biclego == min(biclego))
+plego <- length(biclego)
+plot(1:plego, biclego)
+lines(1:plego,biclego)
+```
+4 variables for BIC --> 3
+- year
+- logprice
+- unique pieces
+
+```{r}
+legomodelbest <- lm(logamazon ~ Year + logprice + Unique_Pieces, data = lego)
+summary(legomodelbest)
+```
+
+6. 
+```{r}
+predictint <- predict(legomodelbest, data.frame(Year = '2020', logprice = log(14.99), 
+Unique_Pieces = 59), interval = "prediction", level = 0.95)
+exp(predictint)
+```
+
+7. 
+if the sample size is large enough
+
+8. 
+if sample size if large enough
+
+9. 
+false
