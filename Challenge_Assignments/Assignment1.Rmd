@@ -1,5 +1,5 @@
 ---
-title: "1o1aexam5"
+title: "Challenge 1 Scratch Notes"
 author: "Joshua Susanto"
 date: '2022-06-05'
 output: html_document

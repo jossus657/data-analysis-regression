@@ -1,5 +1,5 @@
 ---
-title: "101a Final Exam"
+title: "Final Challenge"
 author: "Joshua Susanto"
 date: '2022-06-05'
 output: html_document
@@ -16,6 +16,7 @@ summary(legomodel)
 ```
 
 2.
+
 ```{r}
 plot(legomodel)
 ```

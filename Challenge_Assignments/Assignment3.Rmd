@@ -1,13 +1,8 @@
 ---
-title: "R Notebook"
+title: "Challenge 3 Scratch Work"
 output: html_notebook
 ---
 
-```{r}
-3692567 - 755013
-755013/1063
-
-```
 # trend
 # constant variance
 # normality
@@ -19,6 +14,7 @@ model_transformed <- lm(socialSR ~ phoneSR, data = atus2)
 plot(socializing ~ phone, data = atus)
 plot(socialSR ~ phoneSR, data = atus2)
 ```
+
 ```{r}
 plot(model1)
 abline(2,0)
@@ -46,6 +42,5 @@ cd1 <- cooks.distance(model1)
 cd2 <- cooks.distance(model_transformed)
 which(cd1 >= 0.5)
 which(cd2 >= 0.5)
-54  63 119 173 180 182 187 
 ```
 

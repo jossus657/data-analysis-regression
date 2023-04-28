@@ -1,5 +1,5 @@
 ---
-title: "quiz2"
+title: "Challenge 2 Scratch Work"
 author: "Joshua Susanto"
 date: "4/24/2022"
 output: html_document
@@ -14,7 +14,7 @@ lego_lm <- lm(prices$meanprice ~ legoA$Unique_Pieces)
 summary(lego_lm)
 plot(lego_lm$residuals, legoA$Unique_Pieces[-lego_lm$na.action])
 confint(lego_lm)
--5.8751/ 4.03450
+-5.8751/4.03450
 pt(-5.8751/ 4.03450, df = 204)*2
 ```
 
