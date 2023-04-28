@@ -10,7 +10,7 @@ output: html_document
   - apply rules of logic and start with basic assumptions and axioms --> lead to a singular conclusion
   
 - induction
-  - start with individual pieces and inferwhat the big picture would look likes
+  - start with individual pieces and infer what the big picture would look likes
   - reasonable attempt at the truth but with a margin of error
   - statistical inference is the opposite of deduction
 
@@ -26,7 +26,7 @@ output: html_document
 complete
 
 # how do we see whats in the popultaions
-- get a sense of distortions by random sampling --> simulations (and repitition)
+- get a sense of distortions by random sampling --> simulations (and repetition)
 - math theory can provide a model of random variation (mathematical modeling)
 
 # remember…

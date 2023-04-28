@@ -1,6 +1,6 @@
 ---
-title: "101a HW 4"
-author: "Joshua Susanto - 405568250"
+title: "Homework 4"
+author: "Joshua Susanto"
 date: "4/21/2022"
 output: pdf_document
 ---
