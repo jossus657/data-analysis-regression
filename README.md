@@ -1,5 +1,6 @@
 # Data-Analysis-Regression
-Archive of work done while learning course in Data Analysis and Regression
+
+Archive of work and assignments done while learning course in Data Analysis and Regression. This is an upper-division course which covers various topics in linear modeling, multivariate models, statistical experiment methods, and more. Course taken during Spring 2022.
 
 Includes the following:
 
